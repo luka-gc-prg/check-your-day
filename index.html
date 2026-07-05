@@ -16,53 +16,48 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
 #app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
 
-/* Auth */
 .auth{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:2.5rem}
 .auth-logo h1{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;letter-spacing:-1px;text-align:center;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .auth-logo p{color:var(--text-muted);font-size:.85rem;margin-top:.5rem;text-align:center}
 .auth-users{display:flex;gap:1.5rem}
 .auth-user{display:flex;flex-direction:column;align-items:center;gap:.7rem;cursor:pointer;padding:1.4rem 1.8rem;border-radius:20px;background:var(--surface);border:2px solid var(--border);transition:all .3s}
 .auth-user:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(124,92,252,.2)}
-.auth-user.sel{border-color:var(--purple);box-shadow:0 8px 30px rgba(124,92,252,.25)}
 .auth-user span{font-weight:500;font-size:1rem}
-
 .auth-pass{width:100%;max-width:280px;display:none;flex-direction:column;gap:.8rem;align-items:center}
 .auth-pass.show{display:flex}
 .auth-pass label{font-size:.72rem;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px}
 .auth-error{background:rgba(248,81,73,.12);color:var(--red);font-size:.8rem;padding:.5rem .7rem;border-radius:10px;text-align:center;width:100%}
-
 .avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.2rem;color:#fff}
 .avatar-sm{width:26px;height:26px;font-size:.65rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;color:#fff;flex-shrink:0}
 .avatar-header{width:34px;height:34px;font-size:.8rem}
-
-.input{width:100%;padding:.7rem .9rem;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:.92rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;text-align:center}
+.input{width:100%;padding:.7rem .9rem;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:.92rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
 .input:focus{border-color:var(--purple)}
+.input-tc{text-align:center}
 .btn{width:100%;padding:.8rem;border-radius:14px;background:linear-gradient(135deg,var(--purple),#9b7dff);color:#fff;border:none;font-size:.92rem;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:opacity .2s}
 .btn:hover{opacity:.9}
 .btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-sm{width:auto;padding:.35rem .7rem;font-size:.72rem;border-radius:8px}
+.btn-ghost{background:var(--card);color:var(--text-sec)}
 
-/* Header */
 .header{padding:1rem 1.25rem .7rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .header-left{display:flex;align-items:center;gap:.7rem}
 .header h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:-.5px}
 .header-actions{display:flex;align-items:center;gap:.45rem}
 .icon-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);color:var(--text-sec);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative}
 .icon-btn:hover{background:var(--card);color:var(--text)}
+.icon-btn.active{background:var(--purple-dim);color:var(--purple);border-color:var(--purple)}
 .badge{position:absolute;top:-4px;right:-4px;background:var(--pink);color:#fff;font-size:.55rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 
-/* Content */
 .content{flex:1;overflow-y:auto;padding:.5rem 1.25rem 6rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .content::-webkit-scrollbar{width:0}
 .section-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-muted);margin:1.2rem 0 .7rem}
 
-/* Stats */
 .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.7rem}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.85rem;text-align:center;cursor:pointer;transition:border-color .2s}
 .stat-card:hover{border-color:var(--border-light)}
 .stat-num{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:700}
 .stat-label{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:.15rem}
 
-/* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:.9rem 1rem;margin-bottom:.55rem;transition:all .2s}
 .card:hover{border-color:var(--border-light)}
 .card-done{opacity:.4}
@@ -84,13 +79,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .del-btn:hover{color:var(--red);background:rgba(248,81,73,.1)}
 .priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* Filters */
 .filter-tabs{display:flex;gap:.35rem;margin-bottom:.85rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .filter-tabs::-webkit-scrollbar{display:none}
 .filter-tab{padding:.42rem .75rem;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--text-sec);font-size:.76rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:'Inter',sans-serif}
 .filter-tab.active{background:var(--purple-dim);border-color:var(--purple);color:var(--purple)}
 
-/* Calendar */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
 .cal-header h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:600}
 .cal-nav{display:flex;gap:.4rem}
@@ -104,29 +97,27 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cal-dots{display:flex;gap:2px;height:4px}
 .cal-dot{width:4px;height:4px;border-radius:50%}
 
-/* Events */
 .ev-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.85rem .95rem;margin-bottom:.5rem;display:flex;gap:.75rem;align-items:flex-start;transition:border-color .2s}
 .ev-card:hover{border-color:var(--border-light)}
 .ev-bar{width:3px;min-height:38px;border-radius:2px;flex-shrink:0}
 .ev-content{flex:1;min-width:0}
 .ev-title{font-weight:600;font-size:.92rem;margin-bottom:.25rem}
 .ev-detail{font-size:.75rem;color:var(--text-sec);display:flex;align-items:center;gap:.3rem;margin-top:2px;flex-wrap:wrap}
-.ev-actions{display:flex;gap:.35rem;margin-top:.55rem}
+.ev-actions{display:flex;gap:.35rem;margin-top:.55rem;flex-wrap:wrap}
 .ev-action{font-size:.7rem;font-weight:600;padding:.28rem .6rem;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s}
 .ev-action:hover{opacity:.8}
 .ev-accept{background:var(--green-dim);color:var(--green)}
 .ev-suggest{background:var(--orange-dim);color:var(--orange)}
 .ev-decline{background:rgba(248,81,73,.12);color:var(--red)}
+.ev-export{background:var(--purple-dim);color:var(--purple)}
 .suggest-banner{background:var(--orange-dim);border:1px solid rgba(240,136,62,.2);border-radius:9px;padding:.5rem .75rem;margin-top:.45rem;font-size:.75rem;color:var(--orange);display:flex;align-items:center;gap:.45rem}
 .suggest-banner button{font-size:.68rem;font-weight:600;padding:.2rem .45rem;border-radius:6px;border:none;cursor:pointer;margin-left:auto;background:var(--green-dim);color:var(--green);font-family:'Inter',sans-serif}
 
-/* Sync */
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:2px;flex-shrink:0;transition:background .3s}
 .sync-dot.syncing{background:var(--orange);animation:pulse .8s infinite}
 .sync-dot.error{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* Nav */
 .bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(14,14,14,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:.45rem .5rem calc(.45rem + env(safe-area-inset-bottom));z-index:100}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.45rem 0;cursor:pointer;color:var(--text-muted);border:none;background:none;font-family:inherit;transition:color .2s}
 .nav-item.active{color:var(--purple)}
@@ -134,9 +125,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .fab{position:absolute;bottom:calc(4.2rem + env(safe-area-inset-bottom));right:1.25rem;width:50px;height:50px;border-radius:15px;background:linear-gradient(135deg,var(--purple),#9b7dff);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(124,92,252,.4);z-index:101;transition:transform .2s}
 .fab:hover{transform:scale(1.06)}
 
-/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:22px 22px 0 0;width:100%;max-width:430px;padding:1.4rem;max-height:82vh;overflow-y:auto;animation:slideUp .3s ease}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:22px 22px 0 0;width:100%;max-width:430px;padding:1.4rem;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
 .modal-header h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700}
@@ -147,9 +137,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cat-pills{display:flex;flex-wrap:wrap;gap:.4rem}
 .cat-pill{padding:.45rem .75rem;border-radius:10px;background:var(--card);border:1.5px solid var(--border);color:var(--text-sec);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.3rem}
 .cat-pill.active{border-color:var(--purple);background:var(--purple-dim);color:var(--purple)}
-
+.cat-pill-multi.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
 .empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text-muted)}
 .empty-state p{font-size:.82rem;margin-top:.4rem}
+.notif-banner{background:var(--purple-dim);border:1px solid rgba(124,92,252,.25);border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.7rem;cursor:pointer}
+.notif-banner p{font-size:.82rem;flex:1;color:var(--purple)}
+.notif-banner .btn-sm{flex-shrink:0}
 
 svg.i{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle}
 svg.i-sm{width:11px;height:11px}
@@ -160,351 +153,314 @@ svg.i-check{width:14px;height:14px;stroke:#fff}
 <body>
 <div id="app"></div>
 <script>
-// ═══════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════
-const API_URL = "https://check-your-day.luka-gc.workers.dev";
-const SYNC_INTERVAL = 4000;
+const API_URL="https://check-your-day.luka-gc.workers.dev";
+const SYNC_INTERVAL=4000;
+const FIXED_USERS=[{id:"luka",name:"Luka",color:"#f0883e",emoji:"L"},{id:"samanta",name:"Samanta",color:"#ff6b9d",emoji:"S"}];
+const SHOP_CATS=[{id:"küche",label:"Küche"},{id:"bad",label:"Bad"},{id:"wohnen",label:"Wohnen"},{id:"lebensmittel",label:"Lebensmittel"},{id:"sonstiges",label:"Sonstiges"}];
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const DAYS_L=["Mo","Di","Mi","Do","Fr","Sa","So"];
+const RECURRENCE_OPTS=[{id:"none",label:"Keine"},{id:"daily",label:"Täglich"},{id:"weekly",label:"Wöchentlich"},{id:"monthly",label:"Monatlich"},{id:"yearly",label:"Jährlich"}];
+const REMINDER_OPTS=[{id:"10080",label:"1 Woche"},{id:"4320",label:"3 Tage"},{id:"1440",label:"1 Tag"},{id:"60",label:"1 Stunde"},{id:"30",label:"30 Min"},{id:"15",label:"15 Min"},{id:"5",label:"5 Min"},{id:"0",label:"Pünktlich"}];
 
-// Fixed users
-const FIXED_USERS = [
-  { id: "luka", name: "Luka", color: "#f0883e", emoji: "L" },
-  { id: "samanta", name: "Samanta", color: "#ff6b9d", emoji: "S" },
-];
-
-const SHOP_CATS = [
-  { id:"küche", label:"Küche" },
-  { id:"bad", label:"Bad" },
-  { id:"wohnen", label:"Wohnen" },
-  { id:"lebensmittel", label:"Lebensmittel" },
-  { id:"sonstiges", label:"Sonstiges" },
-];
-
-const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-const DAYS = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-
-// Icons
-const I = {
-  home:`<svg class="i i-lg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-  cart:`<svg class="i i-lg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>`,
-  check:`<svg class="i i-lg" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`,
-  calendar:`<svg class="i i-lg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-  plus:`<svg class="i i-lg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
-  x:`<svg class="i" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-  clock:`<svg class="i i-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  user:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-  trash:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
-  logout:`<svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
-  bell:`<svg class="i" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
-  chevL:`<svg class="i" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>`,
-  chevR:`<svg class="i" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`,
-  checkSm:`<svg class="i-check" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>`,
-  refresh:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>`,
-  userPlus:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
-  msg:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
-  cal:`<svg class="i i-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+const I={
+home:`<svg class="i i-lg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+cart:`<svg class="i i-lg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>`,
+check:`<svg class="i i-lg" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`,
+calendar:`<svg class="i i-lg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+plus:`<svg class="i i-lg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+x:`<svg class="i" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+clock:`<svg class="i i-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+user:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+trash:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
+logout:`<svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+bell:`<svg class="i" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
+bellOff:`<svg class="i" viewBox="0 0 24 24"><path d="M13.73 21a2 2 0 01-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0118 8"/><path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 00-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
+chevL:`<svg class="i" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>`,
+chevR:`<svg class="i" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`,
+checkSm:`<svg class="i-check" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>`,
+refresh:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>`,
+userPlus:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+msg:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
+cal:`<svg class="i i-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+repeat:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>`,
+download:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 };
 
-// ── State ──
-let S = {
-  token: sessionStorage.getItem("cyd_token"),
-  user: JSON.parse(sessionStorage.getItem("cyd_user") || "null"),
-  users: [],
-  page: "home",
-  shopping: [], todos: [], events: [],
-  calMonth: new Date().getMonth(),
-  calYear: new Date().getFullYear(),
-  selectedDate: null,
-  shopFilter: "alle",
-  todoFilter: "alle",
-  modal: null,
-  selectedUser: null,
-  authError: null,
-  syncStatus: "ok",
-};
-let syncTimer = null;
+let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),selectedDate:null,shopFilter:"alle",todoFilter:"alle",modal:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}"),};
+let syncTimer=null,reminderTimer=null;
 
 // ── API ──
-async function api(path, method="GET", body=null) {
-  const h = { "Content-Type": "application/json" };
-  if (S.token) h["Authorization"] = `Bearer ${S.token}`;
-  const opts = { method, headers: h };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API_URL + path, opts);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Fehler");
-  return data;
-}
-
-async function sync() {
-  if (!S.token) return;
-  try {
-    S.syncStatus = "syncing";
-    updateSyncDot();
-    const [s, t, e, u] = await Promise.all([api("/api/shopping"), api("/api/todos"), api("/api/events"), api("/api/users")]);
-    S.shopping = s.shopping || [];
-    S.todos = t.todos || [];
-    S.events = e.events || [];
-    S.users = u.users || [];
-    S.syncStatus = "ok";
-    render();
-  } catch(e) { S.syncStatus = "error"; updateSyncDot(); }
-}
-function startSync() { sync(); syncTimer = setInterval(sync, SYNC_INTERVAL); }
-function stopSync() { if (syncTimer) clearInterval(syncTimer); syncTimer = null; }
-function updateSyncDot() { const d = document.getElementById("sync-dot"); if (d) d.className = `sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}`; }
+async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const r=await fetch(API_URL+p,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
+async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const[s,t,e,u]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.syncStatus="ok";render();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
+function startSync(){sync();syncTimer=setInterval(sync,SYNC_INTERVAL);startReminderCheck()}
+function stopSync(){if(syncTimer)clearInterval(syncTimer);syncTimer=null;stopReminderCheck()}
+function updateSyncDot(){const d=document.getElementById("sync-dot");if(d)d.className=`sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}`}
 
 // ── Auth ──
-async function doLogin(username, password) {
-  try {
-    S.authError = null;
-    const data = await api("/api/auth/login", "POST", { username, password });
-    S.token = data.token;
-    S.user = data.user;
-    sessionStorage.setItem("cyd_token", data.token);
-    sessionStorage.setItem("cyd_user", JSON.stringify(data.user));
-    S.selectedUser = null;
-    S.page = "home";
-    render();
-    startSync();
-  } catch(e) { S.authError = e.message; render(); }
-}
-function logout() {
-  S.token = null; S.user = null; S.shopping = []; S.todos = []; S.events = []; S.users = [];
-  S.selectedUser = null; S.authError = null;
-  sessionStorage.removeItem("cyd_token"); sessionStorage.removeItem("cyd_user");
-  stopSync(); render();
-}
+async function doLogin(u,p){try{S.authError=null;const d=await api("/api/auth/login","POST",{username:u,password:p});S.token=d.token;S.user=d.user;sessionStorage.setItem("cyd_token",d.token);sessionStorage.setItem("cyd_user",JSON.stringify(d.user));S.selectedUser=null;S.page="home";render();startSync()}catch(e){S.authError=e.message;render()}}
+function logout(){S.token=null;S.user=null;S.shopping=[];S.todos=[];S.events=[];S.users=[];S.selectedUser=null;S.authError=null;sessionStorage.removeItem("cyd_token");sessionStorage.removeItem("cyd_user");stopSync();render()}
 
 // ── Helpers ──
-function esc(s) { const d = document.createElement("div"); d.textContent = s||""; return d.innerHTML; }
-function getUser(id) { return S.users.find(u=>u.id===id) || FIXED_USERS.find(u=>u.id===id) || { displayName:id, color:"#666", emoji:"?" }; }
-function getPartner() { return S.users.find(u=>u.id!==S.user?.id) || FIXED_USERS.find(u=>u.id!==(S.user?.id)) || null; }
-function formatDate(d) { const dt=new Date(d); return `${dt.getDate()}. ${MONTHS[dt.getMonth()].slice(0,3)}`; }
-function todayStr() { return new Date().toISOString().split("T")[0]; }
-function pColor(p) { return p==="high"?"var(--red)":p==="medium"?"var(--orange)":"var(--teal)"; }
-function av(uid,extra="") { const u=getUser(uid); return `<div class="avatar-sm ${extra}" style="background:${u.color}">${u.emoji}</div>`; }
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+function getUser(id){return S.users.find(u=>u.id===id)||FIXED_USERS.find(u=>u.id===id)||{displayName:id,color:"#666",emoji:"?"}}
+function getPartner(){return S.users.find(u=>u.id!==S.user?.id)||FIXED_USERS.find(u=>u.id!==(S.user?.id))||null}
+function formatDate(d){const dt=new Date(d);return`${dt.getDate()}. ${MONTHS[dt.getMonth()].slice(0,3)}`}
+function todayStr(){return new Date().toISOString().split("T")[0]}
+function pColor(p){return p==="high"?"var(--red)":p==="medium"?"var(--orange)":"var(--teal)"}
+function av(uid,x=""){const u=getUser(uid);return`<div class="avatar-sm ${x}" style="background:${u.color}">${u.emoji}</div>`}
+function recLabel(r){return RECURRENCE_OPTS.find(x=>x.id===r)?.label||""}
+
+// ── Recurring Events ──
+function getEventsForDate(dateStr){
+  let result=[];
+  S.events.forEach(e=>{
+    if(e.date===dateStr){result.push(e);return}
+    if(!e.recurrence||e.recurrence==="none")return;
+    const evDate=new Date(e.date),target=new Date(dateStr);
+    if(target<evDate)return;
+    const diffDays=Math.floor((target-evDate)/(86400000));
+    const diffMonths=(target.getFullYear()-evDate.getFullYear())*12+(target.getMonth()-evDate.getMonth());
+    let match=false;
+    if(e.recurrence==="daily")match=true;
+    else if(e.recurrence==="weekly")match=diffDays%7===0;
+    else if(e.recurrence==="monthly")match=target.getDate()===evDate.getDate();
+    else if(e.recurrence==="yearly")match=target.getDate()===evDate.getDate()&&target.getMonth()===evDate.getMonth();
+    if(match)result.push({...e,_recurDate:dateStr});
+  });
+  return result;
+}
+
+function getEventsForMonth(y,m){
+  const dim=new Date(y,m+1,0).getDate();
+  let all=[];
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    getEventsForDate(ds).forEach(e=>{if(!all.find(x=>x.id===e.id&&(x._recurDate||x.date)===(e._recurDate||e.date)))all.push(e)});
+  }
+  return all.sort((a,b)=>(a._recurDate||a.date).localeCompare(b._recurDate||b.date)||a.time.localeCompare(b.time));
+}
+
+// ── Notifications ──
+function requestNotifPermission(){
+  if(!("Notification" in window)){alert("Dein Browser unterstützt keine Benachrichtigungen");return}
+  Notification.requestPermission().then(p=>{
+    S.notifEnabled=p==="granted";
+    localStorage.setItem("cyd_notif",S.notifEnabled?"true":"false");
+    render();
+  });
+}
+
+function toggleNotif(){
+  if(S.notifEnabled){S.notifEnabled=false;localStorage.setItem("cyd_notif","false");render()}
+  else requestNotifPermission();
+}
+
+function startReminderCheck(){reminderTimer=setInterval(checkReminders,30000)}
+function stopReminderCheck(){if(reminderTimer)clearInterval(reminderTimer);reminderTimer=null}
+
+function checkReminders(){
+  if(!S.notifEnabled||!S.events.length)return;
+  const now=new Date();
+  const todayS=todayStr();
+  // Check today and tomorrow
+  [todayS,(() => {const t=new Date();t.setDate(t.getDate()+1);return t.toISOString().split("T")[0]})()].forEach(dateStr=>{
+    const evts=getEventsForDate(dateStr);
+    evts.forEach(e=>{
+      if(!e.reminders||!e.reminders.length)return;
+      const evTime=new Date(`${e._recurDate||e.date}T${e.time}:00`);
+      e.reminders.forEach(rMin=>{
+        const reminderTime=new Date(evTime.getTime()-rMin*60000);
+        const diff=reminderTime.getTime()-now.getTime();
+        const key=`${e.id}_${e._recurDate||e.date}_${rMin}`;
+        if(diff<=0&&diff>-60000&&!S.firedReminders[key]){
+          fireNotification(e,rMin);
+          S.firedReminders[key]=true;
+          localStorage.setItem("cyd_fired",JSON.stringify(S.firedReminders));
+        }
+      });
+    });
+  });
+}
+
+function fireNotification(e,minBefore){
+  const label=minBefore===0?"Jetzt":minBefore<60?`In ${minBefore} Min`:minBefore===60?"In 1 Stunde":minBefore===1440?"Morgen":minBefore===4320?"In 3 Tagen":"In 1 Woche";
+  try{new Notification(`${label}: ${e.title}`,{body:`${e.time} Uhr — ${formatDate(e._recurDate||e.date)}`,icon:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>",tag:e.id})}catch(err){}
+}
+
+// ── ICS Export ──
+function exportICS(event){
+  const e=event;
+  const dt=e._recurDate||e.date;
+  const start=dt.replace(/-/g,"")+"T"+e.time.replace(/:/g,"")+"00";
+  const durH=Math.floor((e.duration||60)/60),durM=(e.duration||60)%60;
+  let ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//CheckYourDay//DE\nBEGIN:VEVENT\nDTSTART:${start}\nDURATION:PT${durH}H${durM}M\nSUMMARY:${e.title}\n`;
+  if(e.note)ics+=`DESCRIPTION:${e.note}\n`;
+  if(e.recurrence&&e.recurrence!=="none"){
+    const freq={daily:"DAILY",weekly:"WEEKLY",monthly:"MONTHLY",yearly:"YEARLY"}[e.recurrence];
+    if(freq)ics+=`RRULE:FREQ=${freq}\n`;
+  }
+  if(e.reminders&&e.reminders.length){
+    e.reminders.forEach(m=>{ics+=`BEGIN:VALARM\nTRIGGER:-PT${m}M\nACTION:DISPLAY\nDESCRIPTION:Erinnerung\nEND:VALARM\n`});
+  }
+  ics+=`UID:${e.id}@checkyourday\nEND:VEVENT\nEND:VCALENDAR`;
+  const blob=new Blob([ics],{type:"text/calendar"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`${e.title.replace(/[^a-zA-Z0-9äöüÄÖÜ]/g,"_")}.ics`;
+  a.click();
+}
 
 // ── Data Actions ──
-async function toggleShop(id) { const i=S.shopping.find(x=>x.id===id); if(!i)return; i.done=!i.done; render(); api(`/api/shopping/${id}`,"PUT",{done:i.done}); }
-async function delShop(id) { S.shopping=S.shopping.filter(x=>x.id!==id); render(); api(`/api/shopping/${id}`,"DELETE"); }
-async function addShop(text,cat) { await api("/api/shopping","POST",{text,category:cat,done:false}); closeModal(); sync(); }
-async function toggleTodo(id) { const i=S.todos.find(x=>x.id===id); if(!i)return; i.done=!i.done; render(); api(`/api/todos/${id}`,"PUT",{done:i.done}); }
-async function delTodo(id) { S.todos=S.todos.filter(x=>x.id!==id); render(); api(`/api/todos/${id}`,"DELETE"); }
-async function addTodo(text,due,pri,assignee) { await api("/api/todos","POST",{text,due,priority:pri,assignee,done:false}); closeModal(); sync(); }
-async function addEv(title,date,time,dur,invite,note) {
+async function toggleShop(id){const i=S.shopping.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/shopping/${id}`,"PUT",{done:i.done})}
+async function delShop(id){S.shopping=S.shopping.filter(x=>x.id!==id);render();api(`/api/shopping/${id}`,"DELETE")}
+async function addShop(text,cat){await api("/api/shopping","POST",{text,category:cat,done:false});closeModal();sync()}
+async function toggleTodo(id){const i=S.todos.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/todos/${id}`,"PUT",{done:i.done})}
+async function delTodo(id){S.todos=S.todos.filter(x=>x.id!==id);render();api(`/api/todos/${id}`,"DELETE")}
+async function addTodo(text,due,pri,assignee){await api("/api/todos","POST",{text,due,priority:pri,assignee,done:false});closeModal();sync()}
+async function addEv(title,date,time,dur,invite,note,recurrence,reminders){
   const p=getPartner();
-  await api("/api/events","POST",{title,date,time,duration:parseInt(dur)||60,invited:invite&&p?p.id:null,status:invite&&p?"pending":"accepted",note:note||""});
-  closeModal(); sync();
+  await api("/api/events","POST",{title,date,time,duration:parseInt(dur)||60,invited:invite&&p?p.id:null,status:invite&&p?"pending":"accepted",note:note||"",recurrence:recurrence||"none",reminders:reminders||[]});
+  closeModal();sync();
 }
-async function acceptEv(id) { await api(`/api/events/${id}`,"PUT",{status:"accepted"}); sync(); }
-async function declineEv(id) { await api(`/api/events/${id}`,"PUT",{status:"declined"}); sync(); }
-async function suggestTime(id,t) { await api(`/api/events/${id}`,"PUT",{suggestedTime:t,suggestedBy:S.user.id}); sync(); }
-async function acceptSug(id) { const e=S.events.find(x=>x.id===id); if(!e)return; await api(`/api/events/${id}`,"PUT",{time:e.suggestedTime,suggestedTime:null,suggestedBy:null,status:"accepted"}); sync(); }
-async function delEv(id) { S.events=S.events.filter(x=>x.id!==id); render(); api(`/api/events/${id}`,"DELETE"); }
+async function acceptEv(id){await api(`/api/events/${id}`,"PUT",{status:"accepted"});sync()}
+async function declineEv(id){await api(`/api/events/${id}`,"PUT",{status:"declined"});sync()}
+async function suggestTime(id,t){await api(`/api/events/${id}`,"PUT",{suggestedTime:t,suggestedBy:S.user.id});sync()}
+async function acceptSug(id){const e=S.events.find(x=>x.id===id);if(!e)return;await api(`/api/events/${id}`,"PUT",{time:e.suggestedTime,suggestedTime:null,suggestedBy:null,status:"accepted"});sync()}
+async function delEv(id){S.events=S.events.filter(x=>x.id!==id);render();api(`/api/events/${id}`,"DELETE")}
 
-function openModal(t) { S.modal=t; render(); }
-function closeModal() { S.modal=null; render(); }
+function openModal(t){S.modal=t;render()}
+function closeModal(){S.modal=null;render()}
 
 // ── RENDER ──
-function render() {
-  const app = document.getElementById("app");
-  if (!S.token || !S.user) { app.innerHTML = renderAuth(); return; }
-  app.innerHTML = renderMain();
-  if (S.modal) renderModal();
+function render(){
+  const app=document.getElementById("app");
+  if(!S.token||!S.user){app.innerHTML=renderAuth();return}
+  app.innerHTML=renderMain();
+  if(S.modal)renderModal();
 }
 
-// ── Auth Screen ──
-function renderAuth() {
-  if (S.selectedUser) {
-    const u = FIXED_USERS.find(x=>x.id===S.selectedUser);
-    return `<div class="auth">
-      <div class="auth-logo"><h1>check your day</h1><p>euer gemeinsamer planer</p></div>
-      <div class="avatar" style="background:${u.color};width:72px;height:72px;font-size:1.5rem">${u.emoji}</div>
-      <div class="auth-pass show">
-        <label>Passwort für ${esc(u.name)}</label>
-        ${S.authError?`<div class="auth-error">${esc(S.authError)}</div>`:""}
-        <input class="input" id="pw" type="password" placeholder="••••••" autofocus onkeydown="if(event.key==='Enter')doLoginClick()">
-        <button class="btn" onclick="doLoginClick()">Einloggen</button>
-        <button class="btn" style="background:var(--card);color:var(--text-sec);margin-top:-.2rem" onclick="S.selectedUser=null;S.authError=null;render()">Zurück</button>
-      </div>
-    </div>`;
-  }
-  return `<div class="auth">
-    <div class="auth-logo"><h1>check your day</h1><p>euer gemeinsamer planer</p></div>
-    <div class="auth-users">
-      ${FIXED_USERS.map(u=>`<div class="auth-user" onclick="S.selectedUser='${u.id}';S.authError=null;render()">
-        <div class="avatar" style="background:${u.color}">${u.emoji}</div>
-        <span>${esc(u.name)}</span>
-      </div>`).join("")}
-    </div>
-  </div>`;
+function renderAuth(){
+  if(S.selectedUser){const u=FIXED_USERS.find(x=>x.id===S.selectedUser);return`<div class="auth"><div class="auth-logo"><h1>check your day</h1><p>euer gemeinsamer planer</p></div><div class="avatar" style="background:${u.color};width:72px;height:72px;font-size:1.5rem">${u.emoji}</div><div class="auth-pass show"><label>Passwort für ${esc(u.name)}</label>${S.authError?`<div class="auth-error">${esc(S.authError)}</div>`:""}<input class="input input-tc" id="pw" type="password" placeholder="••••••" autofocus onkeydown="if(event.key==='Enter')doLoginClick()"><button class="btn" onclick="doLoginClick()">Einloggen</button><button class="btn btn-ghost" onclick="S.selectedUser=null;S.authError=null;render()">Zurück</button></div></div>`}
+  return`<div class="auth"><div class="auth-logo"><h1>check your day</h1><p>euer gemeinsamer planer</p></div><div class="auth-users">${FIXED_USERS.map(u=>`<div class="auth-user" onclick="S.selectedUser='${u.id}';S.authError=null;render()"><div class="avatar" style="background:${u.color}">${u.emoji}</div><span>${esc(u.name)}</span></div>`).join("")}</div></div>`
+}
+window.doLoginClick=()=>{const pw=document.getElementById("pw")?.value;if(!pw){S.authError="Bitte Passwort eingeben";render();return}doLogin(S.selectedUser,pw)};
+
+function renderMain(){
+  const titles={home:"Dashboard",shopping:"Einkaufsliste",todos:"To-Do",calendar:"Kalender"};
+  const pending=S.events.filter(e=>e.invited===S.user.id&&e.status==="pending").length;
+  return`<div class="header"><div class="header-left"><div class="avatar avatar-header" style="background:${S.user.color}">${S.user.emoji}</div><h2>${titles[S.page]}</h2></div><div class="header-actions"><div id="sync-dot" class="sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}"></div><button class="icon-btn ${S.notifEnabled?"active":""}" onclick="toggleNotif()" title="Benachrichtigungen">${S.notifEnabled?I.bell:I.bellOff}</button>${pending>0&&S.page!=="home"?`<button class="icon-btn" onclick="S.page='home';render()">${I.bell}<span class="badge">${pending}</span></button>`:""}<button class="icon-btn" onclick="logout()">${I.logout}</button></div></div>
+  <div class="content">${renderPage()}</div>
+  ${S.page!=="home"?`<button class="fab" onclick="openModal('${S.page}')">${I.plus}</button>`:""}
+  <div class="bottom-nav">${[{id:"home",icon:"home",l:"Home"},{id:"shopping",icon:"cart",l:"Einkauf"},{id:"todos",icon:"check",l:"To-Do"},{id:"calendar",icon:"calendar",l:"Kalender"}].map(n=>`<button class="nav-item ${S.page===n.id?"active":""}" onclick="S.page='${n.id}';S.selectedDate=null;render()">${I[n.icon]}<span>${n.l}</span></button>`).join("")}</div>
+  <div id="modal-root"></div>`
 }
 
-window.doLoginClick = () => {
-  const pw = document.getElementById("pw")?.value;
-  if (!pw) { S.authError="Bitte Passwort eingeben"; render(); return; }
-  doLogin(S.selectedUser, pw);
-};
-
-// ── Main ──
-function renderMain() {
-  const titles = {home:"Dashboard",shopping:"Einkaufsliste",todos:"To-Do",calendar:"Kalender"};
-  const pending = S.events.filter(e=>e.invited===S.user.id&&e.status==="pending").length;
-  return `
-    <div class="header">
-      <div class="header-left">
-        <div class="avatar avatar-header" style="background:${S.user.color}">${S.user.emoji}</div>
-        <h2>${titles[S.page]}</h2>
-      </div>
-      <div class="header-actions">
-        <div id="sync-dot" class="sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}"></div>
-        ${pending>0&&S.page!=="home"?`<button class="icon-btn" onclick="S.page='home';render()">${I.bell}<span class="badge">${pending}</span></button>`:""}
-        <button class="icon-btn" onclick="logout()">${I.logout}</button>
-      </div>
-    </div>
-    <div class="content">${renderPage()}</div>
-    ${S.page!=="home"?`<button class="fab" onclick="openModal('${S.page}')">${I.plus}</button>`:""}
-    <div class="bottom-nav">
-      ${[{id:"home",icon:"home",l:"Home"},{id:"shopping",icon:"cart",l:"Einkauf"},{id:"todos",icon:"check",l:"To-Do"},{id:"calendar",icon:"calendar",l:"Kalender"}]
-        .map(n=>`<button class="nav-item ${S.page===n.id?"active":""}" onclick="S.page='${n.id}';S.selectedDate=null;render()">${I[n.icon]}<span>${n.l}</span></button>`).join("")}
-    </div>
-    <div id="modal-root"></div>`;
-}
-
-function renderPage() {
-  if(S.page==="home") return renderDash();
-  if(S.page==="shopping") return renderShop();
-  if(S.page==="todos") return renderTodos();
-  if(S.page==="calendar") return renderCal();
-  return "";
-}
+function renderPage(){if(S.page==="home")return renderDash();if(S.page==="shopping")return renderShop();if(S.page==="todos")return renderTodos();if(S.page==="calendar")return renderCal();return""}
 
 // ── Dashboard ──
-function renderDash() {
-  const os=S.shopping.filter(x=>!x.done).length, ot=S.todos.filter(x=>!x.done).length, ue=S.events.filter(x=>x.date>=todayStr()).length;
+function renderDash(){
+  const os=S.shopping.filter(x=>!x.done).length,ot=S.todos.filter(x=>!x.done).length,ue=S.events.filter(x=>x.date>=todayStr()).length;
   const pi=S.events.filter(e=>e.invited===S.user.id&&e.status==="pending");
   const sc=S.events.filter(e=>e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id);
+  let h="";
 
-  let h = `<div class="stats-row">
-    <div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--pink)">${os}</div><div class="stat-label">Einkauf</div></div>
-    <div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--teal)">${ot}</div><div class="stat-label">To-Dos</div></div>
-    <div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--purple)">${ue}</div><div class="stat-label">Termine</div></div>
-  </div>`;
+  if(!S.notifEnabled&&"Notification" in window){
+    h+=`<div class="notif-banner" onclick="requestNotifPermission()"><div>${I.bell}</div><p>Benachrichtigungen aktivieren für Erinnerungen</p><button class="btn btn-sm" onclick="event.stopPropagation();requestNotifPermission()">Aktivieren</button></div>`;
+  }
 
-  if(pi.length) {
-    h+=`<div class="section-label">Einladungen</div>`;
-    pi.forEach(e=>{const c=getUser(e.createdBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:${c.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.cal} ${formatDate(e.date)} · ${I.clock} ${e.time} Uhr</div><div class="ev-detail">${I.user} von ${esc(c.displayName)}</div><div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">✓ Annehmen</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">↻ Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">✕ Ablehnen</button></div></div></div>`;});
-  }
-  if(sc.length) {
-    h+=`<div class="section-label">Zeitänderungen</div>`;
-    sc.forEach(e=>{const b=getUser(e.suggestedBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:var(--orange)"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div></div></div>`;});
-  }
+  h+=`<div class="stats-row"><div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--pink)">${os}</div><div class="stat-label">Einkauf</div></div><div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--teal)">${ot}</div><div class="stat-label">To-Dos</div></div><div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--purple)">${ue}</div><div class="stat-label">Termine</div></div></div>`;
+
+  if(pi.length){h+=`<div class="section-label">Einladungen</div>`;pi.forEach(e=>{const c=getUser(e.createdBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:${c.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.cal} ${formatDate(e.date)} · ${I.clock} ${e.time} Uhr</div><div class="ev-detail">${I.user} von ${esc(c.displayName)}</div><div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">✓ Annehmen</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">↻ Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">✕ Ablehnen</button></div></div></div>`})}
+  if(sc.length){h+=`<div class="section-label">Zeitänderungen</div>`;sc.forEach(e=>{const b=getUser(e.suggestedBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:var(--orange)"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div></div></div>`})}
 
   const nt=S.todos.filter(t=>!t.done).slice(0,3);
-  if(nt.length){h+=`<div class="section-label">Nächste To-Dos</div>`;nt.forEach(t=>{h+=`<div class="card" onclick="S.page='todos';render()"><div class="card-row"><div class="priority-dot" style="background:${pColor(t.priority)}"></div><div class="card-text">${esc(t.text)}</div>${av(t.assignee)}</div>${t.due?`<div class="card-meta"><span class="tag tag-purple">${I.clock} ${formatDate(t.due)}</span></div>`:""}</div>`;});}
-
+  if(nt.length){h+=`<div class="section-label">Nächste To-Dos</div>`;nt.forEach(t=>{h+=`<div class="card" onclick="S.page='todos';render()"><div class="card-row"><div class="priority-dot" style="background:${pColor(t.priority)}"></div><div class="card-text">${esc(t.text)}</div>${av(t.assignee)}</div>${t.due?`<div class="card-meta"><span class="tag tag-purple">${I.clock} ${formatDate(t.due)}</span></div>`:""}</div>`})}
   const ns=S.shopping.filter(x=>!x.done).slice(0,3);
-  if(ns.length){h+=`<div class="section-label">Einkaufsliste</div>`;ns.forEach(s=>{h+=`<div class="card" onclick="S.page='shopping';render()"><div class="card-row">${I.cart.replace("i-lg","i i-sm")}<div class="card-text">${esc(s.text)}</div>${av(s.addedBy||s.createdBy)}</div></div>`;});}
-
-  if(!nt.length&&!ns.length&&!pi.length) h+=`<div class="empty-state"><p>Alles erledigt! 🎉</p></div>`;
+  if(ns.length){h+=`<div class="section-label">Einkaufsliste</div>`;ns.forEach(s=>{h+=`<div class="card" onclick="S.page='shopping';render()"><div class="card-row">${I.cart.replace("i-lg","i i-sm")}<div class="card-text">${esc(s.text)}</div>${av(s.addedBy||s.createdBy)}</div></div>`})}
+  if(!nt.length&&!ns.length&&!pi.length)h+=`<div class="empty-state"><p>Alles erledigt! 🎉</p></div>`;
   return h;
 }
 
 // ── Shopping ──
-function renderShop() {
+function renderShop(){
   let h=`<div class="filter-tabs"><div class="filter-tab ${S.shopFilter==="alle"?"active":""}" onclick="S.shopFilter='alle';render()">Alle</div>${SHOP_CATS.map(c=>`<div class="filter-tab ${S.shopFilter===c.id?"active":""}" onclick="S.shopFilter='${c.id}';render()">${c.label}</div>`).join("")}</div>`;
   const items=S.shopFilter==="alle"?S.shopping:S.shopping.filter(x=>x.category===S.shopFilter);
   const open=items.filter(x=>!x.done),done=items.filter(x=>x.done);
-  if(!open.length&&!done.length) h+=`<div class="empty-state"><p>Noch nichts auf der Liste</p></div>`;
-  open.forEach(s=>{const c=SHOP_CATS.find(x=>x.id===s.category);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div>${c?`<div class="card-meta"><span class="tag tag-teal">${c.label}</span></div>`:""}</div>`;});
-  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(s=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleShop('${s.id}')">${I.checkSm}</div><div class="card-text done">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button></div></div>`;});}
+  if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Noch nichts auf der Liste</p></div>`;
+  open.forEach(s=>{const c=SHOP_CATS.find(x=>x.id===s.category);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div>${c?`<div class="card-meta"><span class="tag tag-teal">${c.label}</span></div>`:""}</div>`});
+  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(s=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleShop('${s.id}')">${I.checkSm}</div><div class="card-text done">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button></div></div>`})}
   return h;
 }
 
 // ── Todos ──
-function renderTodos() {
+function renderTodos(){
   const p=getPartner();
   let h=`<div class="filter-tabs"><div class="filter-tab ${S.todoFilter==="alle"?"active":""}" onclick="S.todoFilter='alle';render()">Alle</div><div class="filter-tab ${S.todoFilter==="meine"?"active":""}" onclick="S.todoFilter='meine';render()">Meine</div>${p?`<div class="filter-tab ${S.todoFilter==="partner"?"active":""}" onclick="S.todoFilter='partner';render()">${esc(p.displayName)}</div>`:""}</div>`;
   let items=S.todos;
-  if(S.todoFilter==="meine") items=items.filter(t=>t.assignee===S.user.id);
-  else if(S.todoFilter==="partner"&&p) items=items.filter(t=>t.assignee===p.id);
+  if(S.todoFilter==="meine")items=items.filter(t=>t.assignee===S.user.id);
+  else if(S.todoFilter==="partner"&&p)items=items.filter(t=>t.assignee===p.id);
   const open=items.filter(t=>!t.done),done=items.filter(t=>t.done);
-  if(!open.length&&!done.length) h+=`<div class="empty-state"><p>Keine To-Dos</p></div>`;
-  open.forEach(t=>{const b=getUser(t.addedBy||t.createdBy);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleTodo('${t.id}')"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div><div class="card-meta"><div class="priority-dot" style="background:${pColor(t.priority)}"></div>${t.due?`<span class="tag tag-purple">${I.clock} ${formatDate(t.due)}</span>`:""}<span class="tag tag-pink" style="font-size:.63rem">von ${esc(b.displayName)}</span></div></div>`;});
-  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(t=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleTodo('${t.id}')">${I.checkSm}</div><div class="card-text done">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button></div></div>`;});}
+  if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Keine To-Dos</p></div>`;
+  open.forEach(t=>{const b=getUser(t.addedBy||t.createdBy);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleTodo('${t.id}')"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div><div class="card-meta"><div class="priority-dot" style="background:${pColor(t.priority)}"></div>${t.due?`<span class="tag tag-purple">${I.clock} ${formatDate(t.due)}</span>`:""}<span class="tag tag-pink" style="font-size:.63rem">von ${esc(b.displayName)}</span></div></div>`});
+  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(t=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleTodo('${t.id}')">${I.checkSm}</div><div class="card-text done">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button></div></div>`})}
   return h;
 }
 
 // ── Calendar ──
-function renderCal() {
-  const dim=new Date(S.calYear,S.calMonth+1,0).getDate();
-  let fd=new Date(S.calYear,S.calMonth,1).getDay();fd=fd===0?6:fd-1;
-  const pd=new Date(S.calYear,S.calMonth,0).getDate();
-  const today=todayStr();
+function renderCal(){
+  const dim=new Date(S.calYear,S.calMonth+1,0).getDate();let fd=new Date(S.calYear,S.calMonth,1).getDay();fd=fd===0?6:fd-1;const pd=new Date(S.calYear,S.calMonth,0).getDate();const today=todayStr();
   let cells="";
-  for(let i=fd-1;i>=0;i--) cells+=`<div class="cal-day other">${pd-i}</div>`;
+  for(let i=fd-1;i>=0;i--)cells+=`<div class="cal-day other">${pd-i}</div>`;
   for(let d=1;d<=dim;d++){
     const ds=`${S.calYear}-${String(S.calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    const de=S.events.filter(e=>e.date===ds);
+    const de=getEventsForDate(ds);
     const dots=de.slice(0,3).map(e=>`<div class="cal-dot" style="background:${getUser(e.createdBy).color}"></div>`).join("");
-    cells+=`<div class="cal-day ${ds===today?"today":""} ${ds===S.selectedDate?"selected":""}" onclick="S.selectedDate=S.selectedDate==='${ds}'?null:'${ds}';render()">${d}${dots?`<div class="cal-dots">${dots}</div>`:""}</div>`;
-  }
-  for(let i=1;i<=42-fd-dim;i++) cells+=`<div class="cal-day other">${i}</div>`;
+    cells+=`<div class="cal-day ${ds===today?"today":""} ${ds===S.selectedDate?"selected":""}" onclick="S.selectedDate=S.selectedDate==='${ds}'?null:'${ds}';render()">${d}${dots?`<div class="cal-dots">${dots}</div>`:""}</div>`}
+  for(let i=1;i<=42-fd-dim;i++)cells+=`<div class="cal-day other">${i}</div>`;
 
-  const evts=S.selectedDate?S.events.filter(e=>e.date===S.selectedDate):S.events.filter(e=>{const d=new Date(e.date);return d.getMonth()===S.calMonth&&d.getFullYear()===S.calYear}).sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const evts=S.selectedDate?getEventsForDate(S.selectedDate):getEventsForMonth(S.calYear,S.calMonth);
   let evH="";
-  if(!evts.length) evH=`<div class="empty-state"><p>Keine Termine</p></div>`;
+  if(!evts.length)evH=`<div class="empty-state"><p>Keine Termine</p></div>`;
   else evts.forEach(e=>{
-    const cr=getUser(e.createdBy),inv=e.invited?getUser(e.invited):null;
-    let st="";if(e.invited){const sc=e.status==="accepted"?"tag-green":e.status==="declined"?"tag-red":"tag-orange";const sl=e.status==="accepted"?"Bestätigt":e.status==="declined"?"Abgelehnt":"Ausstehend";st=`<span class="tag ${sc}" style="font-size:.63rem">${sl} · ${esc(inv.displayName)}</span>`;}
-    let sg="";if(e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id){const b=getUser(e.suggestedBy);sg=`<div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div>`;}
-    let ac="";if(e.invited===S.user.id&&e.status==="pending") ac=`<div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">✓ OK</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">↻ Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">✕ Nein</button></div>`;
-    if(e.createdBy===S.user.id) ac+=`<div class="ev-actions"><button class="ev-action ev-decline" onclick="delEv('${e.id}')">🗑 Löschen</button></div>`;
-    evH+=`<div class="ev-card"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${e.time} Uhr · ${e.duration||60} Min${!S.selectedDate?` · ${I.cal} ${formatDate(e.date)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`;
+    const cr=getUser(e.createdBy),inv=e.invited?getUser(e.invited):null,eDate=e._recurDate||e.date;
+    let st="";if(e.invited){const sc=e.status==="accepted"?"tag-green":e.status==="declined"?"tag-red":"tag-orange";const sl=e.status==="accepted"?"Bestätigt":e.status==="declined"?"Abgelehnt":"Ausstehend";st=`<span class="tag ${sc}" style="font-size:.63rem">${sl} · ${esc(inv.displayName)}</span>`}
+    let sg="";if(e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id){const b=getUser(e.suggestedBy);sg=`<div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div>`}
+    let ac="";if(e.invited===S.user.id&&e.status==="pending")ac=`<div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">✓ OK</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">↻ Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">✕ Nein</button></div>`;
+    const exportBtn=`<button class="ev-action ev-export" onclick="event.stopPropagation();exportICS(S.events.find(x=>x.id==='${e.id}'))">${I.download} iPhone</button>`;
+    if(e.createdBy===S.user.id)ac+=`<div class="ev-actions">${exportBtn}<button class="ev-action ev-decline" onclick="delEv('${e.id}')">🗑 Löschen</button></div>`;
+    else ac+=`<div class="ev-actions">${exportBtn}</div>`;
+    let tags="";
+    if(e.recurrence&&e.recurrence!=="none")tags+=`<span class="tag tag-teal">${I.repeat} ${recLabel(e.recurrence)}</span>`;
+    if(e.reminders&&e.reminders.length)tags+=`<span class="tag tag-orange">${I.bell.replace('i-lg','i i-sm')} ${e.reminders.length} Erinnerung${e.reminders.length>1?"en":""}</span>`;
+
+    evH+=`<div class="ev-card"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${e.time} Uhr · ${e.duration||60} Min${!S.selectedDate?` · ${I.cal} ${formatDate(eDate)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${tags?`<div class="ev-detail" style="margin-top:4px;gap:6px">${tags}</div>`:""} ${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`
   });
 
-  return `<div class="cal-header"><h3>${MONTHS[S.calMonth]} ${S.calYear}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevM()">${I.chevL}</button><button class="icon-btn" onclick="nextM()">${I.chevR}</button></div></div>
-    <div class="cal-grid">${DAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join("")}${cells}</div>
-    <div class="section-label">${S.selectedDate?`Termine am ${formatDate(S.selectedDate)}`:`Alle Termine im ${MONTHS[S.calMonth]}`}</div>${evH}`;
+  return`<div class="cal-header"><h3>${MONTHS[S.calMonth]} ${S.calYear}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevM()">${I.chevL}</button><button class="icon-btn" onclick="nextM()">${I.chevR}</button></div></div><div class="cal-grid">${DAYS_L.map(d=>`<div class="cal-day-label">${d}</div>`).join("")}${cells}</div><div class="section-label">${S.selectedDate?`Termine am ${formatDate(S.selectedDate)}`:`Alle Termine im ${MONTHS[S.calMonth]}`}</div>${evH}`
 }
 window.prevM=()=>{if(S.calMonth===0){S.calMonth=11;S.calYear--}else S.calMonth--;S.selectedDate=null;render()};
 window.nextM=()=>{if(S.calMonth===11){S.calMonth=0;S.calYear++}else S.calMonth++;S.selectedDate=null;render()};
 
 // ── Modals ──
-function renderModal() {
-  const root=document.getElementById("modal-root"); if(!root||!S.modal) return;
-  const p=getPartner();
-  let inner="";
+function renderModal(){
+  const root=document.getElementById("modal-root");if(!root||!S.modal)return;
+  const p=getPartner();let inner="";
   if(S.modal==="shopping"){
-    inner=`<div class="modal-header"><h3>Neuer Einkauf</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div>
-      <div class="input-group"><label>Was brauchts?</label><input class="input" id="m-text" placeholder="z.B. Bettwäsche" autofocus></div>
-      <div class="input-group"><label>Kategorie</label><div class="cat-pills">${SHOP_CATS.map((c,i)=>`<div class="cat-pill ${i===0?"active":""}" data-cat="${c.id}" onclick="pickPill(this)">${c.label}</div>`).join("")}</div></div>
-      <button class="btn" onclick="submitShop()">Hinzufügen</button>`;
-  } else if(S.modal==="todos"){
-    inner=`<div class="modal-header"><h3>Neues To-Do</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div>
-      <div class="input-group"><label>Aufgabe</label><input class="input" id="m-text" placeholder="z.B. Kisten packen" autofocus></div>
-      <div class="input-row"><div class="input-group"><label>Bis wann?</label><input class="input" id="m-due" type="date"></div>
-      <div class="input-group"><label>Priorität</label><div class="cat-pills" id="pri-pills"><div class="cat-pill active" data-val="medium" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--orange)"></div> Mittel</div><div class="cat-pill" data-val="high" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--red)"></div> Hoch</div><div class="cat-pill" data-val="low" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--teal)"></div> Tief</div></div></div></div>
-      <div class="input-group"><label>Zuweisen</label><div class="cat-pills" id="assign-pills">
-        <div class="cat-pill active" data-val="${S.user.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${S.user.color};width:16px;height:16px;font-size:.5rem">${S.user.emoji}</div> ${esc(S.user.displayName)}</div>
-        ${p?`<div class="cat-pill" data-val="${p.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${p.color};width:16px;height:16px;font-size:.5rem">${p.emoji}</div> ${esc(p.displayName)}</div>`:""}
-      </div></div>
-      <button class="btn" onclick="submitTodo()">Hinzufügen</button>`;
-  } else if(S.modal==="calendar"){
+    inner=`<div class="modal-header"><h3>Neuer Einkauf</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Was brauchts?</label><input class="input" id="m-text" placeholder="z.B. Bettwäsche" autofocus></div><div class="input-group"><label>Kategorie</label><div class="cat-pills">${SHOP_CATS.map((c,i)=>`<div class="cat-pill ${i===0?"active":""}" data-cat="${c.id}" onclick="pickPill(this)">${c.label}</div>`).join("")}</div></div><button class="btn" onclick="submitShop()">Hinzufügen</button>`;
+  }else if(S.modal==="todos"){
+    inner=`<div class="modal-header"><h3>Neues To-Do</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Aufgabe</label><input class="input" id="m-text" placeholder="z.B. Kisten packen" autofocus></div><div class="input-row"><div class="input-group"><label>Bis wann?</label><input class="input" id="m-due" type="date"></div><div class="input-group"><label>Priorität</label><div class="cat-pills" id="pri-pills"><div class="cat-pill active" data-val="medium" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--orange)"></div> Mittel</div><div class="cat-pill" data-val="high" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--red)"></div> Hoch</div><div class="cat-pill" data-val="low" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--teal)"></div> Tief</div></div></div></div><div class="input-group"><label>Zuweisen</label><div class="cat-pills" id="assign-pills"><div class="cat-pill active" data-val="${S.user.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${S.user.color};width:16px;height:16px;font-size:.5rem">${S.user.emoji}</div> ${esc(S.user.displayName)}</div>${p?`<div class="cat-pill" data-val="${p.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${p.color};width:16px;height:16px;font-size:.5rem">${p.emoji}</div> ${esc(p.displayName)}</div>`:""}</div></div><button class="btn" onclick="submitTodo()">Hinzufügen</button>`;
+  }else if(S.modal==="calendar"){
     inner=`<div class="modal-header"><h3>Neuer Termin</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div>
-      <div class="input-group"><label>Titel</label><input class="input" id="m-title" placeholder="z.B. Möbel abholen" autofocus></div>
-      <div class="input-row"><div class="input-group"><label>Datum</label><input class="input" id="m-date" type="date" value="${S.selectedDate||""}"></div><div class="input-group"><label>Uhrzeit</label><input class="input" id="m-time" type="time"></div></div>
-      <div class="input-row"><div class="input-group"><label>Dauer (Min)</label><input class="input" id="m-dur" type="number" placeholder="60" value="60"></div>
-      <div class="input-group"><label>${p?esc(p.displayName):"Partner"} einladen?</label><div class="cat-pills"><div class="cat-pill" id="m-invite" onclick="this.classList.toggle('active')">${I.userPlus} Einladen</div></div></div></div>
-      <div class="input-group"><label>Notiz</label><input class="input" id="m-note" placeholder="Optional..."></div>
-      <button class="btn" onclick="submitEv()">Termin erstellen</button>`;
-  } else if(S.modal==="suggest"){
-    const ev=S.events.find(e=>e.id===S._sugId);if(!ev){closeModal();return;}
-    inner=`<div class="modal-header"><h3>Neue Zeit vorschlagen</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div>
-      <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:1rem"><strong>${esc(ev.title)}</strong> — aktuell ${ev.time} Uhr am ${formatDate(ev.date)}</p>
-      <div class="input-group"><label>Neue Uhrzeit</label><input class="input" id="m-stime" type="time" value="${ev.time}"></div>
-      <button class="btn" onclick="submitSug()">Vorschlag senden</button>`;
+    <div class="input-group"><label>Titel</label><input class="input" id="m-title" placeholder="z.B. Möbel abholen" autofocus></div>
+    <div class="input-row"><div class="input-group"><label>Datum</label><input class="input" id="m-date" type="date" value="${S.selectedDate||""}"></div><div class="input-group"><label>Uhrzeit</label><input class="input" id="m-time" type="time"></div></div>
+    <div class="input-row"><div class="input-group"><label>Dauer (Min)</label><input class="input" id="m-dur" type="number" placeholder="60" value="60"></div><div class="input-group"><label>${p?esc(p.displayName):"Partner"} einladen?</label><div class="cat-pills"><div class="cat-pill" id="m-invite" onclick="this.classList.toggle('active')">${I.userPlus} Einladen</div></div></div></div>
+    <div class="input-group"><label>Wiederholen</label><div class="cat-pills" id="recur-pills">${RECURRENCE_OPTS.map((r,i)=>`<div class="cat-pill ${i===0?"active":""}" data-val="${r.id}" onclick="pickPill(this)">${r.label}</div>`).join("")}</div></div>
+    <div class="input-group"><label>Erinnerungen</label><div class="cat-pills" id="remind-pills">${REMINDER_OPTS.map(r=>`<div class="cat-pill cat-pill-multi" data-val="${r.id}" onclick="this.classList.toggle('active')">${r.label}</div>`).join("")}</div></div>
+    <div class="input-group"><label>Notiz</label><input class="input" id="m-note" placeholder="Optional..."></div>
+    <button class="btn" onclick="submitEv()">Termin erstellen</button>`;
+  }else if(S.modal==="suggest"){
+    const ev=S.events.find(e=>e.id===S._sugId);if(!ev){closeModal();return}
+    inner=`<div class="modal-header"><h3>Neue Zeit vorschlagen</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><p style="font-size:.85rem;color:var(--text-sec);margin-bottom:1rem"><strong>${esc(ev.title)}</strong> — aktuell ${ev.time} Uhr am ${formatDate(ev.date)}</p><div class="input-group"><label>Neue Uhrzeit</label><input class="input" id="m-stime" type="time" value="${ev.time}"></div><button class="btn" onclick="submitSug()">Vorschlag senden</button>`;
   }
   root.innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${inner}</div></div>`;
 }
@@ -513,12 +469,16 @@ window.openSugModal=(id)=>{S._sugId=id;S.modal="suggest";render()};
 window.pickPill=(el)=>{el.parentElement.querySelectorAll(".cat-pill").forEach(e=>e.classList.remove("active"));el.classList.add("active")};
 window.submitShop=()=>{const t=document.getElementById("m-text")?.value.trim();const c=document.querySelector("#modal-root .cat-pill.active[data-cat]")?.dataset.cat||"sonstiges";if(!t)return;addShop(t,c)};
 window.submitTodo=()=>{const t=document.getElementById("m-text")?.value.trim();const d=document.getElementById("m-due")?.value||"";const pr=document.querySelector("#pri-pills .cat-pill.active")?.dataset.val||"medium";const as=document.querySelector("#assign-pills .cat-pill.active")?.dataset.val||S.user.id;if(!t)return;addTodo(t,d,pr,as)};
-window.submitEv=()=>{const t=document.getElementById("m-title")?.value.trim();const d=document.getElementById("m-date")?.value;const tm=document.getElementById("m-time")?.value||"12:00";const dur=document.getElementById("m-dur")?.value||"60";const inv=document.getElementById("m-invite")?.classList.contains("active");const n=document.getElementById("m-note")?.value.trim()||"";if(!t||!d)return;addEv(t,d,tm,dur,inv,n)};
+window.submitEv=()=>{
+  const t=document.getElementById("m-title")?.value.trim();const d=document.getElementById("m-date")?.value;const tm=document.getElementById("m-time")?.value||"12:00";const dur=document.getElementById("m-dur")?.value||"60";const inv=document.getElementById("m-invite")?.classList.contains("active");const n=document.getElementById("m-note")?.value.trim()||"";
+  const rec=document.querySelector("#recur-pills .cat-pill.active")?.dataset.val||"none";
+  const reminders=[...document.querySelectorAll("#remind-pills .cat-pill-multi.active")].map(el=>parseInt(el.dataset.val));
+  if(!t||!d)return;addEv(t,d,tm,dur,inv,n,rec,reminders);
+};
 window.submitSug=()=>{const t=document.getElementById("m-stime")?.value;if(!t||!S._sugId)return;suggestTime(S._sugId,t);closeModal()};
 
-// Init
 render();
-if(S.token) startSync();
+if(S.token)startSync();
 </script>
 </body>
 </html>
