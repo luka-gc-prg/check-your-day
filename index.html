@@ -191,7 +191,7 @@ let syncTimer=null,reminderTimer=null;
 
 // ── API ──
 async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const r=await fetch(API_URL+p,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
-async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const[s,t,e,u]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.syncStatus="ok";render();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
+async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const[s,t,e,u]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.syncStatus="ok";if(!S.modal)render();else updateSyncDot();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
 function startSync(){sync();syncTimer=setInterval(sync,SYNC_INTERVAL);startReminderCheck()}
 function stopSync(){if(syncTimer)clearInterval(syncTimer);syncTimer=null;stopReminderCheck()}
 function updateSyncDot(){const d=document.getElementById("sync-dot");if(d)d.className=`sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}`}
