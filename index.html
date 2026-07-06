@@ -16,7 +16,7 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
 #app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
 
-.auth{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:2.5rem}
+.auth{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(2rem + env(safe-area-inset-top)) 2rem 2rem;gap:2.5rem}
 .auth-logo h1{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;letter-spacing:-1px;text-align:center;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .auth-logo p{color:var(--text-muted);font-size:.85rem;margin-top:.5rem;text-align:center}
 .auth-users{display:flex;gap:1.5rem}
@@ -39,7 +39,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .btn-sm{width:auto;padding:.35rem .7rem;font-size:.72rem;border-radius:8px}
 .btn-ghost{background:var(--card);color:var(--text-sec)}
 
-.header{padding:1rem 1.25rem .7rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header{padding:calc(1rem + env(safe-area-inset-top)) 1.25rem .7rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .header-left{display:flex;align-items:center;gap:.7rem}
 .header h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:-.5px}
 .header-actions{display:flex;align-items:center;gap:.45rem}
@@ -152,6 +152,7 @@ svg.i-check{width:14px;height:14px;stroke:#fff}
 </head>
 <body>
 <div id="app"></div>
+<div id="modal-container"></div>
 <script>
 const API_URL="https://check-your-day.luka-gc.workers.dev";
 const SYNC_INTERVAL=4000;
@@ -328,15 +329,14 @@ async function suggestTime(id,t){await api(`/api/events/${id}`,"PUT",{suggestedT
 async function acceptSug(id){const e=S.events.find(x=>x.id===id);if(!e)return;await api(`/api/events/${id}`,"PUT",{time:e.suggestedTime,suggestedTime:null,suggestedBy:null,status:"accepted"});sync()}
 async function delEv(id){S.events=S.events.filter(x=>x.id!==id);render();api(`/api/events/${id}`,"DELETE")}
 
-function openModal(t){S.modal=t;render()}
-function closeModal(){S.modal=null;render()}
+function openModal(t){S.modal=t;renderModal()}
+function closeModal(){S.modal=null;document.getElementById("modal-container").innerHTML="";render()}
 
 // ── RENDER ──
 function render(){
   const app=document.getElementById("app");
   if(!S.token||!S.user){app.innerHTML=renderAuth();return}
   app.innerHTML=renderMain();
-  if(S.modal)renderModal();
 }
 
 function renderAuth(){
@@ -443,7 +443,7 @@ window.nextM=()=>{if(S.calMonth===11){S.calMonth=0;S.calYear++}else S.calMonth++
 
 // ── Modals ──
 function renderModal(){
-  const root=document.getElementById("modal-root");if(!root||!S.modal)return;
+  const root=document.getElementById("modal-container");if(!root||!S.modal)return;
   const p=getPartner();let inner="";
   if(S.modal==="shopping"){
     inner=`<div class="modal-header"><h3>Neuer Einkauf</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Was brauchts?</label><input class="input" id="m-text" placeholder="z.B. Bettwäsche" autofocus></div><div class="input-group"><label>Kategorie</label><div class="cat-pills">${SHOP_CATS.map((c,i)=>`<div class="cat-pill ${i===0?"active":""}" data-cat="${c.id}" onclick="pickPill(this)">${c.label}</div>`).join("")}</div></div><button class="btn" onclick="submitShop()">Hinzufügen</button>`;
@@ -465,7 +465,7 @@ function renderModal(){
   root.innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${inner}</div></div>`;
 }
 
-window.openSugModal=(id)=>{S._sugId=id;S.modal="suggest";render()};
+window.openSugModal=(id)=>{S._sugId=id;S.modal="suggest";renderModal()};
 window.pickPill=(el)=>{el.parentElement.querySelectorAll(".cat-pill").forEach(e=>e.classList.remove("active"));el.classList.add("active")};
 window.submitShop=()=>{const t=document.getElementById("m-text")?.value.trim();const c=document.querySelector("#modal-root .cat-pill.active[data-cat]")?.dataset.cat||"sonstiges";if(!t)return;addShop(t,c)};
 window.submitTodo=()=>{const t=document.getElementById("m-text")?.value.trim();const d=document.getElementById("m-due")?.value||"";const pr=document.querySelector("#pri-pills .cat-pill.active")?.dataset.val||"medium";const as=document.querySelector("#assign-pills .cat-pill.active")?.dataset.val||S.user.id;if(!t)return;addTodo(t,d,pr,as)};
