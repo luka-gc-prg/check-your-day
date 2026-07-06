@@ -105,6 +105,33 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
 .cal-header h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:var(--text)}
 .cal-nav{display:flex;gap:.35rem}
+.cal-view-tabs{display:flex;gap:.3rem;margin-bottom:.8rem}
+.cal-view-tab{flex:1;padding:.4rem 0;border-radius:9px;background:var(--card);border:1px solid var(--border);color:var(--text-sec);font-size:.72rem;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;font-family:'Inter',sans-serif}
+.cal-view-tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:.8rem}
+.week-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:.55rem 0;border-radius:12px;cursor:pointer;background:var(--card);border:1px solid var(--border);transition:all .15s}
+.week-day:hover{border-color:var(--border-light)}
+.week-day.today{border-color:var(--accent)}
+.week-day.selected{background:var(--accent);border-color:var(--accent)}
+.week-day.selected .week-day-num,.week-day.selected .week-day-lbl{color:#fff}
+.week-day-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);font-weight:600}
+.week-day-num{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.week-day.today .week-day-num{color:var(--accent)}
+.week-dots{display:flex;gap:2px;height:4px}
+.week-dot{width:4px;height:4px;border-radius:50%}
+.day-timeline{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.5rem 0;margin-bottom:.9rem;max-height:420px;overflow-y:auto}
+.day-timeline::-webkit-scrollbar{width:0}
+.tl-row{display:flex;position:relative;min-height:52px;border-top:1px solid var(--border)}
+.tl-row:first-child{border-top:none}
+.tl-hour{width:44px;flex-shrink:0;font-size:.62rem;color:var(--text-muted);padding:.3rem .5rem 0 0;text-align:right}
+.tl-slot{flex:1;position:relative}
+.tl-event{position:absolute;left:52px;right:8px;border-radius:8px;padding:.3rem .5rem;font-size:.68rem;font-weight:600;color:#fff;overflow:hidden;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tl-event-time{font-size:.6rem;font-weight:500;opacity:.85;display:block}
+.tl-now{position:absolute;left:52px;right:8px;height:2px;background:var(--red);z-index:5}
+.tl-now::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+.dash-today-header{display:flex;align-items:center;justify-content:space-between;margin:1.2rem 0 .65rem}
+.dash-today-header .section-label{margin:0}
+.dash-today-link{font-size:.68rem;color:var(--c-cal);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:.8rem}
 .cal-day-label{text-align:center;font-size:.58rem;font-weight:600;color:var(--text-muted);padding:.3rem 0;text-transform:uppercase}
 .cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;font-size:.8rem;font-weight:500;cursor:pointer;color:var(--text-sec);transition:all .15s;gap:2px}
@@ -213,7 +240,8 @@ repeat:`<svg class="i i-sm" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9
 download:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 };
 
-let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),selectedDate:null,shopFilter:"alle",todoFilter:"alle",modal:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}")};
+let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),calView:"month",calDate:todayStrInit(),selectedDate:null,shopFilter:"alle",todoFilter:"alle",modal:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}")};
+function todayStrInit(){return new Date().toISOString().split("T")[0]}
 let syncTimer=null,reminderTimer=null;
 
 function setSection(page){const s=SECTION[page]||SECTION.home;document.documentElement.style.setProperty("--accent",s.accent);document.documentElement.style.setProperty("--accent-dim",s.dim);document.documentElement.style.setProperty("--accent-bg",s.bg)}
@@ -242,6 +270,48 @@ function recLabel(r){return RECURRENCE_OPTS.find(x=>x.id===r)?.label||""}
 // Recurring
 function getEventsForDate(ds){let r=[];S.events.forEach(e=>{if(e.date===ds){r.push(e);return}if(!e.recurrence||e.recurrence==="none")return;if(e.recurrenceEnd&&ds>e.recurrenceEnd)return;const ed=new Date(e.date),td=new Date(ds);if(td<ed)return;const diff=Math.floor((td-ed)/86400000);let m=false;if(e.recurrence==="daily")m=true;else if(e.recurrence==="weekly")m=diff%7===0;else if(e.recurrence==="monthly")m=td.getDate()===ed.getDate();else if(e.recurrence==="yearly")m=td.getDate()===ed.getDate()&&td.getMonth()===ed.getMonth();if(m)r.push({...e,_recurDate:ds})});return r}
 function getEventsForMonth(y,m){const dim=new Date(y,m+1,0).getDate();let all=[];for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;getEventsForDate(ds).forEach(e=>{if(!all.find(x=>x.id===e.id&&(x._recurDate||x.date)===(e._recurDate||e.date)))all.push(e)})}return all.sort((a,b)=>(a._recurDate||a.date).localeCompare(b._recurDate||b.date)||a.time.localeCompare(b.time))}
+
+function getWeekDates(ds){const d=new Date(ds);let dow=d.getDay();dow=dow===0?6:dow-1;const monday=new Date(d);monday.setDate(d.getDate()-dow);const out=[];for(let i=0;i<7;i++){const x=new Date(monday);x.setDate(monday.getDate()+i);out.push(x.toISOString().split("T")[0])}return out}
+function shiftDate(ds,days){const d=new Date(ds);d.setDate(d.getDate()+days);return d.toISOString().split("T")[0]}
+
+function renderEvCard(e,showDate){
+  const cr=getUser(e.createdBy),inv=e.invited?getUser(e.invited):null,eD=e._recurDate||e.date;
+  let st="";if(e.invited){const sc=e.status==="accepted"?"background:var(--green-dim);color:var(--green)":e.status==="declined"?"background:var(--red-dim);color:var(--red)":"background:rgba(240,136,62,.1);color:#f0883e";const sl=e.status==="accepted"?"Bestätigt":e.status==="declined"?"Abgelehnt":"Ausstehend";st=`<span class="tag" style="${sc};font-size:.6rem">${sl} · ${esc(inv.displayName)}</span>`}
+  let sg="";if(e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id){const b=getUser(e.suggestedBy);sg=`<div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div>`}
+  let ac="";if(e.invited===S.user.id&&e.status==="pending")ac=`<div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">Annehmen</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">Ablehnen</button></div>`;
+  const expBtn=`<button class="ev-action ev-export" onclick="event.stopPropagation();exportICS(S.events.find(x=>x.id==='${e.id}'))">${I.download} Exportieren</button>`;
+  if(e.createdBy===S.user.id)ac+=`<div class="ev-actions">${expBtn}<button class="ev-action ev-decline" onclick="delEv('${e.id}')">Löschen</button></div>`;else ac+=`<div class="ev-actions">${expBtn}</div>`;
+  let tags="";if(e.recurrence&&e.recurrence!=="none")tags+=`<span class="tag" style="background:var(--c-cal-dim);color:var(--c-cal)">${I.repeat} ${recLabel(e.recurrence)}${e.recurrenceEnd?` bis ${formatDate(e.recurrenceEnd)}`:""}</span>`;if(e.reminders&&e.reminders.length)tags+=`<span class="tag" style="background:rgba(240,136,62,.1);color:#f0883e">${e.reminders.length} Erinnerung${e.reminders.length>1?"en":""}</span>`;
+  return`<div class="ev-card"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${e.time} Uhr · ${e.duration||60} Min${showDate?` · ${I.cal} ${formatDate(eD)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${tags?`<div class="ev-detail" style="margin-top:3px;gap:5px">${tags}</div>`:""}${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`;
+}
+
+function renderDayTimeline(ds,compact){
+  const evts=getEventsForDate(ds).sort((a,b)=>a.time.localeCompare(b.time));
+  const startH=6,endH=23;
+  const rowH=compact?42:52;
+  let rows="";
+  for(let h=startH;h<=endH;h++){
+    const label=String(h).padStart(2,"0")+":00";
+    rows+=`<div class="tl-row" style="min-height:${rowH}px"><div class="tl-hour">${label}</div><div class="tl-slot"></div></div>`;
+  }
+  let eventsHTML="";
+  evts.forEach(e=>{
+    const[hh,mm]=e.time.split(":").map(Number);
+    if(hh<startH||hh>endH)return;
+    const top=(hh-startH)*rowH+(mm/60)*rowH;
+    const dur=e.duration||60;
+    const height=Math.max((dur/60)*rowH,24);
+    const color=getUser(e.createdBy).color;
+    eventsHTML+=`<div class="tl-event" style="top:${top}px;height:${height}px;background:${color}" onclick="jumpToDay('${ds}')"><span class="tl-event-time">${e.time}</span>${esc(e.title)}</div>`;
+  });
+  let nowLine="";
+  if(ds===todayStr()){
+    const now=new Date();const h=now.getHours(),m=now.getMinutes();
+    if(h>=startH&&h<=endH){const top=(h-startH)*rowH+(m/60)*rowH;nowLine=`<div class="tl-now" style="top:${top}px"></div>`}
+  }
+  return`<div class="day-timeline">${rows}${eventsHTML}${nowLine}</div>`;
+}
+window.jumpToDay=(ds)=>{S.calView="day";S.calDate=ds;S.selectedDate=ds;S.page="calendar";render()};
 
 // Notifications
 function requestNotifPermission(){if(!("Notification" in window))return;Notification.requestPermission().then(p=>{S.notifEnabled=p==="granted";localStorage.setItem("cyd_notif",S.notifEnabled?"true":"false");render()})}
@@ -297,6 +367,9 @@ function renderDash(){
   let h="";
   if(!S.notifEnabled&&"Notification" in window)h+=`<div class="notif-banner" onclick="requestNotifPermission()"><div>${I.bell}</div><p>Benachrichtigungen aktivieren</p><button class="btn btn-sm" onclick="event.stopPropagation();requestNotifPermission()">Aktivieren</button></div>`;
   h+=`<div class="stats-row"><div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--c-shop)">${os}</div><div class="stat-label">Einkauf</div></div><div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--c-todo)">${ot}</div><div class="stat-label">To-Dos</div></div><div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--c-cal)">${ue}</div><div class="stat-label">Termine</div></div></div>`;
+  const todayEvts=getEventsForDate(todayStr());
+  h+=`<div class="dash-today-header"><div class="section-label">Heute</div><button class="dash-today-link" onclick="S.page='calendar';S.calView='day';S.calDate=todayStr();render()">Tagesansicht →</button></div>`;
+  h+=todayEvts.length?renderDayTimeline(todayStr(),true):`<div class="empty-state"><p>Keine Termine heute</p></div>`;
   if(pi.length){h+=`<div class="section-label">Einladungen</div>`;pi.forEach(e=>{const c=getUser(e.createdBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:${c.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.cal} ${formatDate(e.date)} · ${I.clock} ${e.time} Uhr</div><div class="ev-detail">${I.user} von ${esc(c.displayName)}</div><div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">Annehmen</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">Ablehnen</button></div></div></div>`})}
   if(sc.length){h+=`<div class="section-label">Zeitänderungen</div>`;sc.forEach(e=>{const b=getUser(e.suggestedBy);h+=`<div class="ev-card"><div class="ev-bar" style="background:#f0883e"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div></div></div>`})}
   const nt=S.todos.filter(t=>!t.done).slice(0,3);
@@ -329,25 +402,66 @@ function renderTodos(){
 }
 
 function renderCal(){
+  const tabs=`<div class="cal-view-tabs">
+    <div class="cal-view-tab ${S.calView==="month"?"active":""}" onclick="switchCalView('month')">Monat</div>
+    <div class="cal-view-tab ${S.calView==="week"?"active":""}" onclick="switchCalView('week')">Woche</div>
+    <div class="cal-view-tab ${S.calView==="day"?"active":""}" onclick="switchCalView('day')">Tag</div>
+  </div>`;
+  if(S.calView==="week")return tabs+renderCalWeek();
+  if(S.calView==="day")return tabs+renderCalDay();
+  return tabs+renderCalMonth();
+}
+
+window.switchCalView=(v)=>{
+  if(v!=="month"&&S.calView==="month"){S.calDate=S.selectedDate||todayStr()}
+  S.calView=v;render();
+};
+
+function renderCalMonth(){
   const dim=new Date(S.calYear,S.calMonth+1,0).getDate();let fd=new Date(S.calYear,S.calMonth,1).getDay();fd=fd===0?6:fd-1;const pd=new Date(S.calYear,S.calMonth,0).getDate();const today=todayStr();
   let cells="";for(let i=fd-1;i>=0;i--)cells+=`<div class="cal-day other">${pd-i}</div>`;
   for(let d=1;d<=dim;d++){const ds=`${S.calYear}-${String(S.calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;const de=getEventsForDate(ds);const dots=de.slice(0,3).map(e=>`<div class="cal-dot" style="background:${getUser(e.createdBy).color}"></div>`).join("");cells+=`<div class="cal-day ${ds===today?"today":""} ${ds===S.selectedDate?"selected":""}" onclick="S.selectedDate=S.selectedDate==='${ds}'?null:'${ds}';render()">${d}${dots?`<div class="cal-dots">${dots}</div>`:""}</div>`}
   for(let i=1;i<=42-fd-dim;i++)cells+=`<div class="cal-day other">${i}</div>`;
   const evts=S.selectedDate?getEventsForDate(S.selectedDate):getEventsForMonth(S.calYear,S.calMonth);
   let evH="";if(!evts.length)evH=`<div class="empty-state"><p>Keine Termine</p></div>`;
-  else evts.forEach(e=>{
-    const cr=getUser(e.createdBy),inv=e.invited?getUser(e.invited):null,eD=e._recurDate||e.date;
-    let st="";if(e.invited){const sc=e.status==="accepted"?"background:var(--green-dim);color:var(--green)":e.status==="declined"?"background:var(--red-dim);color:var(--red)":"background:rgba(240,136,62,.1);color:#f0883e";const sl=e.status==="accepted"?"Bestätigt":e.status==="declined"?"Abgelehnt":"Ausstehend";st=`<span class="tag" style="${sc};font-size:.6rem">${sl} · ${esc(inv.displayName)}</span>`}
-    let sg="";if(e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id){const b=getUser(e.suggestedBy);sg=`<div class="suggest-banner">${I.refresh} ${esc(b.displayName)} schlägt ${e.suggestedTime} Uhr vor<button onclick="acceptSug('${e.id}')">OK</button></div>`}
-    let ac="";if(e.invited===S.user.id&&e.status==="pending")ac=`<div class="ev-actions"><button class="ev-action ev-accept" onclick="acceptEv('${e.id}')">Annehmen</button><button class="ev-action ev-suggest" onclick="openSugModal('${e.id}')">Neue Zeit</button><button class="ev-action ev-decline" onclick="declineEv('${e.id}')">Ablehnen</button></div>`;
-    const expBtn=`<button class="ev-action ev-export" onclick="event.stopPropagation();exportICS(S.events.find(x=>x.id==='${e.id}'))">${I.download} Exportieren</button>`;
-    if(e.createdBy===S.user.id)ac+=`<div class="ev-actions">${expBtn}<button class="ev-action ev-decline" onclick="delEv('${e.id}')">Löschen</button></div>`;else ac+=`<div class="ev-actions">${expBtn}</div>`;
-    let tags="";if(e.recurrence&&e.recurrence!=="none")tags+=`<span class="tag" style="background:var(--c-cal-dim);color:var(--c-cal)">${I.repeat} ${recLabel(e.recurrence)}${e.recurrenceEnd?` bis ${formatDate(e.recurrenceEnd)}`:""}</span>`;if(e.reminders&&e.reminders.length)tags+=`<span class="tag" style="background:rgba(240,136,62,.1);color:#f0883e">${e.reminders.length} Erinnerung${e.reminders.length>1?"en":""}</span>`;
-    evH+=`<div class="ev-card"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${e.time} Uhr · ${e.duration||60} Min${!S.selectedDate?` · ${I.cal} ${formatDate(eD)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${tags?`<div class="ev-detail" style="margin-top:3px;gap:5px">${tags}</div>`:""}${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`});
-  return`<div class="cal-header"><h3>${MONTHS[S.calMonth]} ${S.calYear}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevM()">${I.chevL}</button><button class="icon-btn" onclick="nextM()">${I.chevR}</button></div></div><div class="cal-grid">${DAYS_L.map(d=>`<div class="cal-day-label">${d}</div>`).join("")}${cells}</div><div class="section-label">${S.selectedDate?`Termine am ${formatDate(S.selectedDate)}`:`Alle Termine im ${MONTHS[S.calMonth]}`}</div>${evH}`
+  else evts.forEach(e=>{evH+=renderEvCard(e,!S.selectedDate)});
+  return`<div class="cal-header"><h3>${MONTHS[S.calMonth]} ${S.calYear}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevM()">${I.chevL}</button><button class="icon-btn" onclick="nextM()">${I.chevR}</button></div></div><div class="cal-grid">${DAYS_L.map(d=>`<div class="cal-day-label">${d}</div>`).join("")}${cells}</div><div class="section-label">${S.selectedDate?`Termine am ${formatDate(S.selectedDate)}`:`Alle Termine im ${MONTHS[S.calMonth]}`}</div>${evH}`;
 }
 window.prevM=()=>{if(S.calMonth===0){S.calMonth=11;S.calYear--}else S.calMonth--;S.selectedDate=null;render()};
 window.nextM=()=>{if(S.calMonth===11){S.calMonth=0;S.calYear++}else S.calMonth++;S.selectedDate=null;render()};
+
+function renderCalWeek(){
+  const week=getWeekDates(S.calDate);
+  const today=todayStr();
+  const active=S.selectedDate&&week.includes(S.selectedDate)?S.selectedDate:S.calDate;
+  const first=new Date(week[0]),last=new Date(week[6]);
+  const rangeLabel=first.getMonth()===last.getMonth()?`${first.getDate()}.–${last.getDate()}. ${MONTHS[first.getMonth()]}`:`${first.getDate()}. ${MONTHS[first.getMonth()].slice(0,3)} – ${last.getDate()}. ${MONTHS[last.getMonth()].slice(0,3)}`;
+  const strip=week.map(ds=>{
+    const d=new Date(ds);const de=getEventsForDate(ds);
+    const dots=de.slice(0,3).map(e=>`<div class="week-dot" style="background:${getUser(e.createdBy).color}"></div>`).join("");
+    return`<div class="week-day ${ds===today?"today":""} ${ds===active?"selected":""}" onclick="S.selectedDate='${ds}';S.calDate='${ds}';render()"><div class="week-day-lbl">${DAYS_L[d.getDay()===0?6:d.getDay()-1]}</div><div class="week-day-num">${d.getDate()}</div><div class="week-dots">${dots}</div></div>`;
+  }).join("");
+  const timeline=renderDayTimeline(active,true);
+  const evts=getEventsForDate(active).sort((a,b)=>a.time.localeCompare(b.time));
+  let evH=evts.length?evts.map(e=>renderEvCard(e,false)).join(""):`<div class="empty-state"><p>Keine Termine</p></div>`;
+  return`<div class="cal-header"><h3>${rangeLabel}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevWeek()">${I.chevL}</button><button class="icon-btn" onclick="todayWeek()">${I.cal}</button><button class="icon-btn" onclick="nextWeek()">${I.chevR}</button></div></div><div class="week-strip">${strip}</div>${timeline}<div class="section-label">Termine am ${formatDate(active)}</div>${evH}`;
+}
+window.prevWeek=()=>{S.calDate=shiftDate(S.calDate,-7);S.selectedDate=null;render()};
+window.nextWeek=()=>{S.calDate=shiftDate(S.calDate,7);S.selectedDate=null;render()};
+window.todayWeek=()=>{S.calDate=todayStr();S.selectedDate=todayStr();render()};
+
+function renderCalDay(){
+  const ds=S.calDate;
+  const d=new Date(ds);
+  const label=`${DAYS_L[d.getDay()===0?6:d.getDay()-1]}, ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const timeline=renderDayTimeline(ds,false);
+  const evts=getEventsForDate(ds).sort((a,b)=>a.time.localeCompare(b.time));
+  let evH=evts.length?evts.map(e=>renderEvCard(e,false)).join(""):`<div class="empty-state"><p>Keine Termine an diesem Tag</p></div>`;
+  return`<div class="cal-header"><h3>${label}</h3><div class="cal-nav"><button class="icon-btn" onclick="prevDay()">${I.chevL}</button><button class="icon-btn" onclick="todayDay()">${I.cal}</button><button class="icon-btn" onclick="nextDay()">${I.chevR}</button></div></div>${timeline}<div class="section-label">Termine</div>${evH}`;
+}
+window.prevDay=()=>{S.calDate=shiftDate(S.calDate,-1);render()};
+window.nextDay=()=>{S.calDate=shiftDate(S.calDate,1);render()};
+window.todayDay=()=>{S.calDate=todayStr();render()};
 
 // Modals
 function renderModal(){
