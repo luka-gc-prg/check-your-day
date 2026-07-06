@@ -240,7 +240,7 @@ download:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2
 edit:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>`,
 };
 
-let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),calView:"month",calDate:todayStrInit(),selectedDate:null,shopFilter:"alle",todoFilter:"alle",modal:null,editingId:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}")};
+let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),calView:"month",calDate:todayStrInit(),selectedDate:null,shopFilter:"alle",todoFilter:"alle",modal:null,editingId:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}"),baselineSet:false};
 function todayStrInit(){return new Date().toISOString().split("T")[0]}
 let syncTimer=null,reminderTimer=null;
 
@@ -248,14 +248,14 @@ function setSection(page){const s=SECTION[page]||SECTION.home;document.documentE
 
 // API
 async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const r=await fetch(API_URL+p,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
-async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const[s,t,e,u]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.syncStatus="ok";if(!S.modal)render();else updateSyncDot();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
+async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const[s,t,e,u]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);if(!S.modal)render();else updateSyncDot();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
 function startSync(){sync();syncTimer=setInterval(sync,SYNC_INTERVAL);startReminderCheck()}
 function stopSync(){if(syncTimer)clearInterval(syncTimer);syncTimer=null;stopReminderCheck()}
 function updateSyncDot(){const d=document.getElementById("sync-dot");if(d)d.className=`sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}`}
 
 // Auth
 async function doLogin(u,p){try{S.authError=null;const d=await api("/api/auth/login","POST",{username:u,password:p});S.token=d.token;S.user=d.user;sessionStorage.setItem("cyd_token",d.token);sessionStorage.setItem("cyd_user",JSON.stringify(d.user));S.selectedUser=null;S.page="home";render();startSync()}catch(e){S.authError=e.message;render()}}
-function logout(){S.token=null;S.user=null;S.shopping=[];S.todos=[];S.events=[];S.users=[];S.selectedUser=null;S.authError=null;sessionStorage.removeItem("cyd_token");sessionStorage.removeItem("cyd_user");stopSync();render()}
+function logout(){S.token=null;S.user=null;S.shopping=[];S.todos=[];S.events=[];S.users=[];S.selectedUser=null;S.authError=null;S.baselineSet=false;sessionStorage.removeItem("cyd_token");sessionStorage.removeItem("cyd_user");stopSync();render()}
 
 // Helpers
 function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
@@ -321,14 +321,40 @@ function stopReminderCheck(){if(reminderTimer)clearInterval(reminderTimer);remin
 function checkReminders(){if(!S.notifEnabled||!S.events.length)return;const now=new Date();const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);[todayStr(),tmrw.toISOString().split("T")[0]].forEach(ds=>{getEventsForDate(ds).forEach(e=>{if(!e.reminders||!e.reminders.length)return;const evT=new Date(`${e._recurDate||e.date}T${e.time}:00`);e.reminders.forEach(rM=>{const rT=new Date(evT.getTime()-rM*60000);const diff=rT.getTime()-now.getTime();const key=`${e.id}_${e._recurDate||e.date}_${rM}`;if(diff<=0&&diff>-60000&&!S.firedReminders[key]){fireNotif(e,rM);S.firedReminders[key]=true;localStorage.setItem("cyd_fired",JSON.stringify(S.firedReminders))}})})})}
 function fireNotif(e,m){const l=m===0?"Jetzt":m<60?`In ${m} Min`:m===60?"In 1 Std":m===1440?"Morgen":m===4320?"In 3 Tagen":"In 1 Woche";try{new Notification(`${l}: ${e.title}`,{body:`${e.time} Uhr`,tag:e.id})}catch(err){}}
 
+function checkNewItems(oldShopping,oldTodos){
+  if(!S.notifEnabled)return;
+  if(!S.baselineSet){S.baselineSet=true;return}
+  const oldTodoMap={};oldTodos.forEach(t=>oldTodoMap[t.id]=t.assignee);
+  S.todos.forEach(t=>{
+    const isNew=!(t.id in oldTodoMap);
+    const prevAssignee=oldTodoMap[t.id];
+    if(t.assignee===S.user.id&&t.createdBy!==S.user.id&&(isNew||prevAssignee!==S.user.id)){
+      const by=getUser(t.createdBy||t.addedBy);
+      try{new Notification(`Neue Aufgabe für dich`,{body:`${t.text} — von ${by.displayName}`,tag:"todo_"+t.id})}catch(err){}
+    }
+  });
+  const oldShopIds=new Set(oldShopping.map(s=>s.id));
+  S.shopping.forEach(s=>{
+    if(oldShopIds.has(s.id))return;
+    const creator=s.addedBy||s.createdBy;
+    if(creator===S.user.id)return;
+    const by=getUser(creator);
+    if(s.assignee&&s.assignee===S.user.id){
+      try{new Notification(`Einkauf dir zugewiesen`,{body:`${s.text} — von ${by.displayName}`,tag:"shop_"+s.id})}catch(err){}
+    }else{
+      try{new Notification(`Neu auf der Einkaufsliste`,{body:`${s.text} — von ${by.displayName}`,tag:"shop_"+s.id})}catch(err){}
+    }
+  });
+}
+
 // ICS
 function exportICS(e){const dt=e._recurDate||e.date;const st=dt.replace(/-/g,"")+"T"+e.time.replace(/:/g,"")+"00";const dH=Math.floor((e.duration||60)/60),dM=(e.duration||60)%60;let ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//CheckYourDay//DE\nBEGIN:VEVENT\nDTSTART:${st}\nDURATION:PT${dH}H${dM}M\nSUMMARY:${e.title}\n`;if(e.note)ics+=`DESCRIPTION:${e.note}\n`;if(e.recurrence&&e.recurrence!=="none"){const f={daily:"DAILY",weekly:"WEEKLY",monthly:"MONTHLY",yearly:"YEARLY"}[e.recurrence];if(f){let rrule=`RRULE:FREQ=${f}`;if(e.recurrenceEnd)rrule+=`;UNTIL=${e.recurrenceEnd.replace(/-/g,"")}T235959Z`;ics+=rrule+"\n"}}if(e.reminders&&e.reminders.length)e.reminders.forEach(m=>{ics+=`BEGIN:VALARM\nTRIGGER:-PT${m}M\nACTION:DISPLAY\nDESCRIPTION:Erinnerung\nEND:VALARM\n`});ics+=`UID:${e.id}@checkyourday\nEND:VEVENT\nEND:VCALENDAR`;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download=`${e.title.replace(/[^a-zA-Z0-9äöüÄÖÜ]/g,"_")}.ics`;a.click()}
 
 // Data Actions
 async function toggleShop(id){const i=S.shopping.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/shopping/${id}`,"PUT",{done:i.done})}
 async function delShop(id){S.shopping=S.shopping.filter(x=>x.id!==id);render();api(`/api/shopping/${id}`,"DELETE")}
-async function addShop(t,c){await api("/api/shopping","POST",{text:t,category:c,done:false});closeModal();sync()}
-async function editShop(id,t,c){await api(`/api/shopping/${id}`,"PUT",{text:t,category:c});closeModal();sync()}
+async function addShop(t,c,a){await api("/api/shopping","POST",{text:t,category:c,assignee:a||null,done:false});closeModal();sync()}
+async function editShop(id,t,c,a){await api(`/api/shopping/${id}`,"PUT",{text:t,category:c,assignee:a||null});closeModal();sync()}
 async function toggleTodo(id){const i=S.todos.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/todos/${id}`,"PUT",{done:i.done})}
 async function delTodo(id){S.todos=S.todos.filter(x=>x.id!==id);render();api(`/api/todos/${id}`,"DELETE")}
 async function addTodo(t,d,p,a){await api("/api/todos","POST",{text:t,due:d,priority:p,assignee:a,done:false});closeModal();sync()}
@@ -391,7 +417,7 @@ function renderShop(){
   const items=S.shopFilter==="alle"?S.shopping:S.shopping.filter(x=>x.category===S.shopFilter);
   const open=items.filter(x=>!x.done),done=items.filter(x=>x.done);
   if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Liste ist leer</p></div>`;
-  open.forEach(s=>{const c=SHOP_CATS.find(x=>x.id===s.category);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div>${c?`<div class="card-meta"><span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop)">${c.label}</span></div>`:""}</div>`});
+  open.forEach(s=>{const c=SHOP_CATS.find(x=>x.id===s.category);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.assignee||s.addedBy||s.createdBy)}</div><div class="card-meta">${c?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop)">${c.label}</span>`:""}${s.assignee?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">für ${esc(getUser(s.assignee).displayName)}</span>`:""}</div></div>`});
   if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(s=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleShop('${s.id}')">${I.checkSm}</div><div class="card-text done">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button></div></div>`})}
   return h;
 }
@@ -476,7 +502,7 @@ function renderModal(){
   const editing=!!S.editingId;
   if(S.modal==="shopping"){
     const item=editing?S.shopping.find(x=>x.id===S.editingId):null;
-    inner=`<div class="modal-header"><h3>${editing?"Einkauf bearbeiten":"Neuer Einkauf"}</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Artikel</label><input class="input" id="m-text" placeholder="z.B. Bettwäsche" value="${item?esc(item.text):""}" autofocus></div><div class="input-group"><label>Kategorie</label><div class="cat-pills">${SHOP_CATS.map((c,i)=>`<div class="cat-pill ${item?(item.category===c.id?"active":""):(i===0?"active":"")}" data-cat="${c.id}" onclick="pickPill(this)">${c.label}</div>`).join("")}</div></div><button class="btn" style="background:var(--c-shop)" onclick="submitShop()">${editing?"Speichern":"Hinzufügen"}</button>`;
+    inner=`<div class="modal-header"><h3>${editing?"Einkauf bearbeiten":"Neuer Einkauf"}</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Artikel</label><input class="input" id="m-text" placeholder="z.B. Bettwäsche" value="${item?esc(item.text):""}" autofocus></div><div class="input-group"><label>Kategorie</label><div class="cat-pills">${SHOP_CATS.map((c,i)=>`<div class="cat-pill ${item?(item.category===c.id?"active":""):(i===0?"active":"")}" data-cat="${c.id}" onclick="pickPill(this)">${c.label}</div>`).join("")}</div></div><div class="input-group"><label>Zuweisen (optional)</label><div class="cat-pills" id="shop-assign-pills"><div class="cat-pill ${!item||!item.assignee?"active":""}" data-val="" onclick="pickPill(this)">Niemand</div><div class="cat-pill ${item&&item.assignee===S.user.id?"active":""}" data-val="${S.user.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${S.user.color};width:15px;height:15px;font-size:.45rem;border-radius:4px">${S.user.emoji}</div> ${esc(S.user.displayName)}</div>${p?`<div class="cat-pill ${item&&item.assignee===p.id?"active":""}" data-val="${p.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${p.color};width:15px;height:15px;font-size:.45rem;border-radius:4px">${p.emoji}</div> ${esc(p.displayName)}</div>`:""}</div></div><button class="btn" style="background:var(--c-shop)" onclick="submitShop()">${editing?"Speichern":"Hinzufügen"}</button>`;
   }else if(S.modal==="todos"){
     const item=editing?S.todos.find(x=>x.id===S.editingId):null;
     inner=`<div class="modal-header"><h3>${editing?"Aufgabe bearbeiten":"Neue Aufgabe"}</h3><button class="close-btn" onclick="closeModal()">${I.x}</button></div><div class="input-group"><label>Aufgabe</label><input class="input" id="m-text" placeholder="z.B. Kisten packen" value="${item?esc(item.text):""}" autofocus></div><div class="input-row"><div class="input-group"><label>Fällig am</label><input class="input" id="m-due" type="date" value="${item?item.due||"":""}"></div><div class="input-group"><label>Priorität</label><div class="cat-pills" id="pri-pills"><div class="cat-pill ${(item?item.priority:"medium")==="medium"?"active":""}" data-val="medium" onclick="pickPill(this)"><div class="priority-dot" style="background:#f0883e"></div> Mittel</div><div class="cat-pill ${item&&item.priority==="high"?"active":""}" data-val="high" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--red)"></div> Hoch</div><div class="cat-pill ${item&&item.priority==="low"?"active":""}" data-val="low" onclick="pickPill(this)"><div class="priority-dot" style="background:var(--c-todo)"></div> Normal</div></div></div></div><div class="input-group"><label>Zuweisen</label><div class="cat-pills" id="assign-pills"><div class="cat-pill ${(item?item.assignee:S.user.id)===S.user.id?"active":""}" data-val="${S.user.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${S.user.color};width:15px;height:15px;font-size:.45rem;border-radius:4px">${S.user.emoji}</div> ${esc(S.user.displayName)}</div>${p?`<div class="cat-pill ${item&&item.assignee===p.id?"active":""}" data-val="${p.id}" onclick="pickPill(this)"><div class="avatar-sm" style="background:${p.color};width:15px;height:15px;font-size:.45rem;border-radius:4px">${p.emoji}</div> ${esc(p.displayName)}</div>`:""}</div></div><button class="btn" style="background:var(--c-todo)" onclick="submitTodo()">${editing?"Speichern":"Hinzufügen"}</button>`;
@@ -494,7 +520,7 @@ function renderModal(){
 window.openSugModal=(id)=>{S._sugId=id;S.modal="suggest";renderModal()};
 window.pickPill=(el)=>{el.parentElement.querySelectorAll(".cat-pill").forEach(e=>e.classList.remove("active"));el.classList.add("active")};
 window.toggleRecurEnd=()=>{const val=document.querySelector("#recur-pills .cat-pill.active")?.dataset.val;const g=document.getElementById("recur-end-group");if(g)g.style.display=(val&&val!=="none")?"block":"none"};
-window.submitShop=()=>{const t=document.getElementById("m-text")?.value.trim();const c=document.querySelector("#modal-container .cat-pill.active[data-cat]")?.dataset.cat||"sonstiges";if(!t)return;if(S.editingId)editShop(S.editingId,t,c);else addShop(t,c)};
+window.submitShop=()=>{const t=document.getElementById("m-text")?.value.trim();const c=document.querySelector("#modal-container .cat-pill.active[data-cat]")?.dataset.cat||"sonstiges";const a=document.querySelector("#shop-assign-pills .cat-pill.active")?.dataset.val||"";if(!t)return;if(S.editingId)editShop(S.editingId,t,c,a);else addShop(t,c,a)};
 window.submitTodo=()=>{const t=document.getElementById("m-text")?.value.trim();const d=document.getElementById("m-due")?.value||"";const pr=document.querySelector("#pri-pills .cat-pill.active")?.dataset.val||"medium";const as=document.querySelector("#assign-pills .cat-pill.active")?.dataset.val||S.user.id;if(!t)return;if(S.editingId)editTodo(S.editingId,t,d,pr,as);else addTodo(t,d,pr,as)};
 window.submitEv=()=>{const t=document.getElementById("m-title")?.value.trim();const d=document.getElementById("m-date")?.value;const tm=document.getElementById("m-time")?.value||"12:00";const dur=document.getElementById("m-dur")?.value||"60";const inv=document.getElementById("m-invite")?.classList.contains("active");const n=document.getElementById("m-note")?.value.trim()||"";const rec=document.querySelector("#recur-pills .cat-pill.active")?.dataset.val||"none";const recEnd=document.getElementById("m-recur-end")?.value||"";const rem=[...document.querySelectorAll("#remind-pills .cat-pill-multi.active")].map(el=>parseInt(el.dataset.val));if(!t||!d)return;if(S.editingId)editEv(S.editingId,t,d,tm,dur,n,rec,rem,recEnd);else addEv(t,d,tm,dur,inv,n,rec,rem,recEnd)};
 window.submitSug=()=>{const t=document.getElementById("m-stime")?.value;if(!t||!S._sugId)return;suggestTime(S._sugId,t);closeModal()};
