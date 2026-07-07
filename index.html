@@ -313,7 +313,7 @@ function renderEvCard(e,showDate){
   if(e.createdBy===S.user.id){const editBtn=`<button class="ev-action ev-suggest" onclick="event.stopPropagation();openEditEvent('${e.id}')">${I.edit} Bearbeiten</button>`;ac+=`<div class="ev-actions">${editBtn}${expBtn}<button class="ev-action ev-decline" onclick="delEv('${e.id}')">Löschen</button></div>`}else ac+=`<div class="ev-actions">${expBtn}</div>`;
   let tags="";if(e.recurrence&&e.recurrence!=="none")tags+=`<span class="tag" style="background:var(--c-cal-dim);color:var(--c-cal)">${I.repeat} ${recLabel(e.recurrence)}${e.recurrenceEnd?` bis ${formatDate(e.recurrenceEnd)}`:""}</span>`;if(e.reminders&&e.reminders.length)tags+=`<span class="tag" style="background:rgba(240,136,62,.1);color:#f0883e">${e.reminders.length} Erinnerung${e.reminders.length>1?"en":""}</span>`;
   const timeLabel=e.allDay?"Ganztägig":`${e.time} – ${e.endTime||addMinutesToTime(e.time,e.duration||60)} Uhr`;
-  return`<div class="ev-card"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${timeLabel}${showDate?` · ${I.cal} ${formatDate(eD)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${tags?`<div class="ev-detail" style="margin-top:3px;gap:5px">${tags}</div>`:""}${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`;
+  return`<div class="ev-card" data-anchor="ev_${e.id}_${eD}"><div class="ev-bar" style="background:${cr.color}"></div><div class="ev-content"><div class="ev-title">${esc(e.title)}</div><div class="ev-detail">${I.clock} ${timeLabel}${showDate?` · ${I.cal} ${formatDate(eD)}`:""}</div><div class="ev-detail" style="margin-top:2px">${I.user} ${esc(cr.displayName)} ${st}</div>${tags?`<div class="ev-detail" style="margin-top:3px;gap:5px">${tags}</div>`:""}${e.note?`<div class="ev-detail" style="margin-top:3px;font-style:italic">${I.msg} ${esc(e.note)}</div>`:""}${sg}${ac}</div></div>`;
 }
 
 function renderDayTimeline(ds,compact){
@@ -435,16 +435,47 @@ window.openEditListModal=(id)=>{S.editingId=id;S.modal="shoplist";renderModal()}
 
 // RENDER
 let _lastRenderedPage=null;
+
+function getScrollAnchor(container){
+  if(!container)return null;
+  const cTop=container.getBoundingClientRect().top;
+  const items=container.querySelectorAll("[data-anchor]");
+  for(const el of items){
+    const r=el.getBoundingClientRect();
+    if(r.bottom>cTop)return{id:el.getAttribute("data-anchor"),offset:r.top-cTop};
+  }
+  return null;
+}
+
+function restoreScrollAnchor(container,anchor,fallbackScrollTop){
+  if(!container)return;
+  if(anchor){
+    const el=container.querySelector(`[data-anchor="${anchor.id}"]`);
+    if(el){
+      const cTop=container.getBoundingClientRect().top;
+      const r=el.getBoundingClientRect();
+      const delta=(r.top-cTop)-anchor.offset;
+      container.scrollTop+=delta;
+      return;
+    }
+  }
+  container.scrollTop=fallbackScrollTop;
+}
+
 function render(){
   setSection(S.page);
   const app=document.getElementById("app");
   const prevContent=document.querySelector(".content");
   const samePage=_lastRenderedPage===S.page;
   const scrollTop=(prevContent&&samePage)?prevContent.scrollTop:0;
+  const anchor=(prevContent&&samePage)?getScrollAnchor(prevContent):null;
   if(!S.token||!S.user){app.innerHTML=renderAuth();_lastRenderedPage=null;return}
   app.innerHTML=renderMain();
   const newContent=document.querySelector(".content");
-  if(newContent)newContent.scrollTop=scrollTop;
+  if(newContent){
+    if(samePage)restoreScrollAnchor(newContent,anchor,scrollTop);
+    else newContent.scrollTop=0;
+  }
   _lastRenderedPage=S.page;
 }
 
@@ -478,9 +509,9 @@ function renderDash(){
   if(pi.length){h+=`<div class="section-label">Einladungen</div>`;pi.forEach(e=>{h+=renderEvCard(e,true)})}
   if(sc.length){h+=`<div class="section-label">Zeitänderungen</div>`;sc.forEach(e=>{h+=renderEvCard(e,true)})}
   const nt=S.todos.filter(t=>!t.done).slice(0,3);
-  if(nt.length){h+=`<div class="section-label">Nächste To-Dos</div>`;nt.forEach(t=>{h+=`<div class="card" onclick="S.page='todos';render()"><div class="card-row"><div class="priority-dot" style="background:${pColor(t.priority)}"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div>${t.due?`<div class="card-meta"><span class="tag" style="background:var(--c-todo-dim);color:var(--c-todo)">${I.clock} ${formatDate(t.due)}</span></div>`:""}</div>`})}
+  if(nt.length){h+=`<div class="section-label">Nächste To-Dos</div>`;nt.forEach(t=>{h+=`<div class="card" data-anchor="dashtodo_${t.id}" onclick="S.page='todos';render()"><div class="card-row"><div class="priority-dot" style="background:${pColor(t.priority)}"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div>${t.due?`<div class="card-meta"><span class="tag" style="background:var(--c-todo-dim);color:var(--c-todo)">${I.clock} ${formatDate(t.due)}</span></div>`:""}</div>`})}
   const ns=S.shopping.filter(x=>!x.done).slice(0,3);
-  if(ns.length){h+=`<div class="section-label">Einkaufsliste</div>`;ns.forEach(s=>{h+=`<div class="card" onclick="S.page='shopping';render()"><div class="card-row"><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div></div>`})}
+  if(ns.length){h+=`<div class="section-label">Einkaufsliste</div>`;ns.forEach(s=>{h+=`<div class="card" data-anchor="dashshop_${s.id}" onclick="S.page='shopping';render()"><div class="card-row"><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div></div>`})}
   if(!nt.length&&!ns.length&&!pi.length)h+=`<div class="empty-state"><p>Alles erledigt</p></div>`;
   return h;
 }
@@ -513,13 +544,13 @@ function renderShop(){
     if(price>0)priceTag=`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty>1?`${qty}× `:""}${fmtCHF(price)}${qty>1?` = ${fmtCHF(sub)}`:""}</span>`;
     else if(qty>1)priceTag=`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty}×</span>`;
     const linkBtn=s.link?`<button class="del-btn" onclick="event.stopPropagation();window.open('${esc(s.link)}','_blank')" title="Produkt öffnen">${I.link}</button>`:"";
-    h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.assignee||s.addedBy||s.createdBy)}</div>${(priceTag||s.assignee)?`<div class="card-meta">${priceTag}${s.assignee?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">für ${esc(getUser(s.assignee).displayName)}</span>`:""}</div>`:""}</div>`
+    h+=`<div class="card" data-anchor="shop_${s.id}"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.assignee||s.addedBy||s.createdBy)}</div>${(priceTag||s.assignee)?`<div class="card-meta">${priceTag}${s.assignee?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">für ${esc(getUser(s.assignee).displayName)}</span>`:""}</div>`:""}</div>`
   });
   if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(s=>{
     const qty=s.qty||1,price=s.price||0,sub=qty*price;
     const priceTag=price>0?`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty>1?`${qty}× `:""}${fmtCHF(price)}${qty>1?` = ${fmtCHF(sub)}`:""}</span>`:"";
     const linkBtn=s.link?`<button class="del-btn" onclick="event.stopPropagation();window.open('${esc(s.link)}','_blank')" title="Produkt öffnen">${I.link}</button>`:"";
-    h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleShop('${s.id}')">${I.checkSm}</div><div class="card-text done">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button></div>${priceTag?`<div class="card-meta">${priceTag}</div>`:""}</div>`
+    h+=`<div class="card card-done" data-anchor="shop_${s.id}"><div class="card-row"><div class="card-check checked" onclick="toggleShop('${s.id}')">${I.checkSm}</div><div class="card-text done">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button></div>${priceTag?`<div class="card-meta">${priceTag}</div>`:""}</div>`
   })}
   return h;
 }
@@ -530,8 +561,8 @@ function renderTodos(){
   let items=S.todos;if(S.todoFilter==="meine")items=items.filter(t=>t.assignee===S.user.id);else if(S.todoFilter==="partner"&&p)items=items.filter(t=>t.assignee===p.id);
   const open=items.filter(t=>!t.done),done=items.filter(t=>t.done);
   if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Keine Aufgaben</p></div>`;
-  open.forEach(t=>{const b=getUser(t.addedBy||t.createdBy);h+=`<div class="card"><div class="card-row"><div class="card-check" onclick="toggleTodo('${t.id}')"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div><div class="card-meta"><div class="priority-dot" style="background:${pColor(t.priority)}"></div>${t.due?`<span class="tag" style="background:var(--c-todo-dim);color:var(--c-todo)">${I.clock} ${formatDate(t.due)}</span>`:""}<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">von ${esc(b.displayName)}</span></div></div>`});
-  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(t=>{h+=`<div class="card card-done"><div class="card-row"><div class="card-check checked" onclick="toggleTodo('${t.id}')">${I.checkSm}</div><div class="card-text done">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button></div></div>`})}
+  open.forEach(t=>{const b=getUser(t.addedBy||t.createdBy);h+=`<div class="card" data-anchor="todo_${t.id}"><div class="card-row"><div class="card-check" onclick="toggleTodo('${t.id}')"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div><div class="card-meta"><div class="priority-dot" style="background:${pColor(t.priority)}"></div>${t.due?`<span class="tag" style="background:var(--c-todo-dim);color:var(--c-todo)">${I.clock} ${formatDate(t.due)}</span>`:""}<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">von ${esc(b.displayName)}</span></div></div>`});
+  if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(t=>{h+=`<div class="card card-done" data-anchor="todo_${t.id}"><div class="card-row"><div class="card-check checked" onclick="toggleTodo('${t.id}')">${I.checkSm}</div><div class="card-text done">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button></div></div>`})}
   return h;
 }
 
