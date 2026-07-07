@@ -410,7 +410,19 @@ window.openNewListModal=()=>{S.editingId=null;S.modal="shoplist";renderModal()};
 window.openEditListModal=(id)=>{S.editingId=id;S.modal="shoplist";renderModal()};
 
 // RENDER
-function render(){setSection(S.page);const app=document.getElementById("app");if(!S.token||!S.user){app.innerHTML=renderAuth();return}app.innerHTML=renderMain()}
+let _lastRenderedPage=null;
+function render(){
+  setSection(S.page);
+  const app=document.getElementById("app");
+  const prevContent=document.querySelector(".content");
+  const samePage=_lastRenderedPage===S.page;
+  const scrollTop=(prevContent&&samePage)?prevContent.scrollTop:0;
+  if(!S.token||!S.user){app.innerHTML=renderAuth();_lastRenderedPage=null;return}
+  app.innerHTML=renderMain();
+  const newContent=document.querySelector(".content");
+  if(newContent)newContent.scrollTop=scrollTop;
+  _lastRenderedPage=S.page;
+}
 
 function renderAuth(){
   if(S.selectedUser){const u=FIXED_USERS.find(x=>x.id===S.selectedUser);return`<div class="auth"><div class="auth-logo"><svg class="auth-logo-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" rx="112" fill="#111"/><rect x="72" y="72" width="164" height="164" rx="36" fill="rgba(149,128,255,.15)"/><rect x="276" y="72" width="164" height="164" rx="36" fill="rgba(88,166,255,.15)"/><rect x="72" y="276" width="164" height="164" rx="36" fill="rgba(255,107,138,.15)"/><rect x="276" y="276" width="164" height="164" rx="36" fill="rgba(78,205,196,.15)"/><polyline points="120,160 148,188 200,128" fill="none" stroke="#9580ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><rect x="320" y="124" width="76" height="72" rx="12" fill="none" stroke="#58a6ff" stroke-width="7"/><line x1="320" y1="148" x2="396" y2="148" stroke="#58a6ff" stroke-width="7"/><line x1="340" y1="112" x2="340" y2="132" stroke="#58a6ff" stroke-width="7" stroke-linecap="round"/><line x1="376" y1="112" x2="376" y2="132" stroke="#58a6ff" stroke-width="7" stroke-linecap="round"/><circle cx="344" cy="170" r="4" fill="#58a6ff"/><circle cx="368" cy="170" r="4" fill="#58a6ff" opacity=".5"/><line x1="120" y1="330" x2="210" y2="330" stroke="#ff6b8a" stroke-width="7" stroke-linecap="round"/><line x1="120" y1="358" x2="192" y2="358" stroke="#ff6b8a" stroke-width="7" stroke-linecap="round"/><line x1="120" y1="386" x2="200" y2="386" stroke="#ff6b8a" stroke-width="7" stroke-linecap="round"/><line x1="120" y1="414" x2="178" y2="414" stroke="#ff6b8a" stroke-width="7" stroke-linecap="round" opacity=".5"/><circle cx="358" cy="358" r="52" fill="none" stroke="#4ecdc4" stroke-width="7"/><line x1="358" y1="358" x2="358" y2="320" stroke="#4ecdc4" stroke-width="7" stroke-linecap="round"/><line x1="358" y1="358" x2="386" y2="372" stroke="#4ecdc4" stroke-width="7" stroke-linecap="round"/><circle cx="358" cy="358" r="5" fill="#4ecdc4"/></svg><h1>check your day</h1><p>gemeinsamer planer</p></div><div class="avatar" style="background:${u.color};width:64px;height:64px;font-size:1.4rem;border-radius:18px">${u.emoji}</div><div class="auth-pass show"><label>Passwort für ${esc(u.name)}</label>${S.authError?`<div class="auth-error">${esc(S.authError)}</div>`:""}<input class="input input-tc" id="pw" type="password" placeholder="••••••" autofocus onkeydown="if(event.key==='Enter')doLoginClick()"><button class="btn" onclick="doLoginClick()">Einloggen</button><button class="btn btn-ghost" onclick="S.selectedUser=null;S.authError=null;render()">Zurück</button></div></div>`}
