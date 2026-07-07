@@ -212,6 +212,7 @@ svg.i-check{width:12px;height:12px;stroke:#fff}
 const API_URL="https://check-your-day.luka-gc.workers.dev";
 const SYNC_INTERVAL=4000;
 const FIXED_USERS=[{id:"luka",name:"Luka",color:"#f0883e",emoji:"L"},{id:"samanta",name:"Samanta",color:"#ff6b8a",emoji:"S"}];
+const OVERVIEW_ID="__overview__";
 const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 const DAYS_L=["Mo","Di","Mi","Do","Fr","Sa","So"];
 const RECURRENCE_OPTS=[{id:"none",label:"Keine"},{id:"daily",label:"Täglich"},{id:"weekly",label:"Wöchentlich"},{id:"monthly",label:"Monatlich"},{id:"yearly",label:"Jährlich"}];
@@ -280,7 +281,7 @@ setInterval(()=>{
   }
 },120);
 
-async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const oldSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const[s,t,e,u,sl]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users"),api("/api/shoppinglists")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.shoppingLists=sl.shoppinglists||[];await ensureDefaultList();if(!S.activeListId&&S.shoppingLists.length)S.activeListId=S.shoppingLists[0].id;S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);const newSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const dataChanged=oldSnapshot!==newSnapshot;if(dataChanged&&!S.modal&&!_interacting){render()}else{updateSyncDot();if(dataChanged)_pendingRender=true}checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
+async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const oldSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const[s,t,e,u,sl]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users"),api("/api/shoppinglists")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.shoppingLists=sl.shoppinglists||[];await ensureDefaultList();if(!S.activeListId)S.activeListId=OVERVIEW_ID;S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);const newSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const dataChanged=oldSnapshot!==newSnapshot;if(dataChanged&&!S.modal&&!_interacting){render()}else{updateSyncDot();if(dataChanged)_pendingRender=true}checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
 async function ensureDefaultList(){if(S.shoppingLists.length)return;try{const r=await api("/api/shoppinglists","POST",{name:"Alltag",color:"#ff6b8a"});S.shoppingLists=[r.item];S.activeListId=r.item.id}catch(e){}}
 function startSync(){sync();syncTimer=setInterval(sync,SYNC_INTERVAL);startReminderCheck()}
 function stopSync(){if(syncTimer)clearInterval(syncTimer);syncTimer=null;stopReminderCheck()}
@@ -493,7 +494,7 @@ function renderMain(){
   const pending=S.events.filter(e=>e.invited===S.user.id&&e.status==="pending").length;
   return`<div class="header"><div class="header-left"><div class="avatar avatar-header" style="background:${S.user.color}">${S.user.emoji}</div><h2>${titles[S.page]}</h2></div><div class="header-actions"><div id="sync-dot" class="sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}"></div><button class="icon-btn ${S.notifEnabled?"active":""}" onclick="toggleNotif()">${S.notifEnabled?I.bell:I.bellOff}</button>${pending>0&&S.page!=="home"?`<button class="icon-btn" onclick="S.page='home';render()">${I.bell}<span class="badge">${pending}</span></button>`:""}<button class="icon-btn" onclick="logout()">${I.logout}</button></div></div>
   <div class="content">${renderPage()}</div>
-  ${S.page!=="home"?`<button class="fab" onclick="openModal('${S.page}')">${I.plus}</button>`:""}
+  ${(S.page!=="home"&&!(S.page==="shopping"&&(S.activeListId||OVERVIEW_ID)===OVERVIEW_ID))?`<button class="fab" onclick="openModal('${S.page}')">${I.plus}</button>`:""}
   <div class="bottom-nav">${[{id:"home",icon:"home",l:"Home"},{id:"shopping",icon:"cart",l:"Einkauf"},{id:"todos",icon:"check",l:"To-Do"},{id:"calendar",icon:"calendar",l:"Kalender"}].map(n=>`<button class="nav-item ${S.page===n.id?"active":""}" onclick="S.page='${n.id}';S.selectedDate=null;render()">${I[n.icon]}<span>${n.l}</span></button>`).join("")}</div>`
 }
 
@@ -533,23 +534,36 @@ function getShopTotals(items){
 function renderShop(){
   if(!S.shoppingLists.length)return`<div class="empty-state"><p>Listen werden geladen…</p></div>`;
   const defaultListId=S.shoppingLists[0].id;
-  const activeId=S.activeListId||defaultListId;
-  const activeList=S.shoppingLists.find(l=>l.id===activeId)||S.shoppingLists[0];
+  const activeId=S.activeListId||OVERVIEW_ID;
 
-  let listTabs=`<div class="filter-tabs">${S.shoppingLists.map(l=>`<div class="filter-tab ${l.id===activeId?"active":""}" onclick="S.activeListId='${l.id}';render()">${esc(l.name)}</div>`).join("")}<div class="filter-tab" onclick="openNewListModal()" style="color:var(--c-shop)">+ Liste</div></div>`;
+  let listTabs=`<div class="filter-tabs"><div class="filter-tab ${activeId===OVERVIEW_ID?"active":""}" onclick="S.activeListId='${OVERVIEW_ID}';render()">Übersicht</div>${S.shoppingLists.map(l=>`<div class="filter-tab ${l.id===activeId?"active":""}" onclick="S.activeListId='${l.id}';render()">${esc(l.name)}</div>`).join("")}<div class="filter-tab" onclick="openNewListModal()" style="color:var(--c-shop)">+ Liste</div></div>`;
 
   let h=listTabs;
 
+  if(activeId===OVERVIEW_ID){
+    const allTotals=getShopTotals(S.shopping);
+    if(allTotals.total>0){
+      h+=`<div class="section-label" style="margin-top:0">Gesamtbudget</div><div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.25rem">${fmtCHF(allTotals.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.25rem">${fmtCHF(allTotals.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.25rem">${fmtCHF(allTotals.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
+    }else{
+      h+=`<div class="empty-state"><p>Noch keine Preise eingetragen</p></div>`;
+    }
+    h+=`<div class="section-label">Listen</div>`;
+    S.shoppingLists.forEach(l=>{
+      const lItems=S.shopping.filter(s=>(s.listId||defaultListId)===l.id);
+      const t=getShopTotals(lItems);
+      const openCount=lItems.filter(x=>!x.done).length;
+      h+=`<div class="card" onclick="S.activeListId='${l.id}';render()"><div class="card-row"><div class="priority-dot" style="background:${l.color}"></div><div class="card-text">${esc(l.name)}</div><span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${openCount} offen</span></div>${t.total>0?`<div class="card-meta"><span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop)">${fmtCHF(t.total)} gesamt</span></div>`:""}</div>`;
+    });
+    return h;
+  }
+
+  const activeList=S.shoppingLists.find(l=>l.id===activeId)||S.shoppingLists[0];
   const listItems=S.shopping.filter(s=>(s.listId||defaultListId)===activeId);
   const items=listItems;
   const open=items.filter(x=>!x.done),done=items.filter(x=>x.done);
   const listTotals=getShopTotals(items);
-  const allTotals=getShopTotals(S.shopping);
-  if(allTotals.total>0){
+  if(listTotals.total>0){
     h+=`<div class="section-label" style="margin-top:0">Budget · ${esc(activeList.name)}</div><div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.25rem">${fmtCHF(listTotals.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.25rem">${fmtCHF(listTotals.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.25rem">${fmtCHF(listTotals.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
-    if(S.shoppingLists.length>1){
-      h+=`<div class="section-label">Gesamtbudget</div><div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.25rem">${fmtCHF(allTotals.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.25rem">${fmtCHF(allTotals.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.25rem">${fmtCHF(allTotals.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
-    }
   }
   h+=`<div class="dash-today-header" style="margin-top:0"><div class="section-label" style="margin:0">${esc(activeList.name)}</div><button class="dash-today-link" style="color:var(--c-shop)" onclick="openEditListModal('${activeList.id}')">Liste bearbeiten</button></div>`;
   if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Liste ist leer</p></div>`;
