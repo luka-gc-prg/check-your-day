@@ -32,7 +32,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 #app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
 
 /* Section bg */
-.content{flex:1;overflow-y:auto;padding:.5rem 1.25rem 6rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;background:var(--accent-bg);transition:background .4s}
+.content{flex:1;overflow-y:auto;padding:.5rem 1.25rem 6rem;-webkit-overflow-scrolling:touch;background:var(--accent-bg);transition:background .4s}
 .content::-webkit-scrollbar{width:0}
 
 /* Auth */
@@ -255,10 +255,17 @@ function setSection(page){const s=SECTION[page]||SECTION.home;document.documentE
 async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const r=await fetch(API_URL+p,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
 let _interacting=false,_interactTimer=null;
 function markInteracting(){_interacting=true;if(_interactTimer)clearTimeout(_interactTimer)}
-function markInteractionEnd(){if(_interactTimer)clearTimeout(_interactTimer);_interactTimer=setTimeout(()=>{_interacting=false;if(S.token&&S.user)render()},650)}
+function markInteractionEnd(){if(_interactTimer)clearTimeout(_interactTimer);_interactTimer=setTimeout(()=>{_interacting=false;if(S.token&&S.user)render()},900)}
 document.addEventListener("touchstart",markInteracting,{passive:true});
+document.addEventListener("touchmove",markInteracting,{passive:true});
 document.addEventListener("touchend",markInteractionEnd,{passive:true});
 document.addEventListener("touchcancel",markInteractionEnd,{passive:true});
+document.addEventListener("scroll",(e)=>{
+  if(!e.target||!e.target.classList||!e.target.classList.contains("content"))return;
+  _interacting=true;
+  if(_interactTimer)clearTimeout(_interactTimer);
+  _interactTimer=setTimeout(()=>{_interacting=false;if(S.token&&S.user)render()},900);
+},true);
 
 async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const[s,t,e,u,sl]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users"),api("/api/shoppinglists")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.shoppingLists=sl.shoppinglists||[];await ensureDefaultList();if(!S.activeListId&&S.shoppingLists.length)S.activeListId=S.shoppingLists[0].id;S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);if(!S.modal&&!_interacting)render();else updateSyncDot();checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
 async function ensureDefaultList(){if(S.shoppingLists.length)return;try{const r=await api("/api/shoppinglists","POST",{name:"Alltag",color:"#ff6b8a"});S.shoppingLists=[r.item];S.activeListId=r.item.id}catch(e){}}
@@ -390,14 +397,14 @@ function exportICS(e){
 
 // Data Actions
 async function toggleShop(id){const i=S.shopping.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/shopping/${id}`,"PUT",{done:i.done})}
-async function delShop(id){S.shopping=S.shopping.filter(x=>x.id!==id);render();api(`/api/shopping/${id}`,"DELETE")}
+async function delShop(id){if(!confirm("Diesen Einkauf wirklich löschen?"))return;S.shopping=S.shopping.filter(x=>x.id!==id);render();api(`/api/shopping/${id}`,"DELETE")}
 async function addShop(t,a,qty,price,link,listId){await api("/api/shopping","POST",{text:t,assignee:a||null,qty:qty||1,price:price||0,link:link||"",listId:listId||S.activeListId,done:false});closeModal();sync()}
 async function editShop(id,t,a,qty,price,link,listId){await api(`/api/shopping/${id}`,"PUT",{text:t,assignee:a||null,qty:qty||1,price:price||0,link:link||"",listId:listId||S.activeListId});closeModal();sync()}
 async function addShopList(name,color){const r=await api("/api/shoppinglists","POST",{name,color});S.activeListId=r.item.id;closeModal();sync()}
 async function editShopList(id,name,color){await api(`/api/shoppinglists/${id}`,"PUT",{name,color});closeModal();sync()}
 async function delShopList(id){if(S.shoppingLists.length<=1)return;const itemsInList=S.shopping.filter(s=>(s.listId||S.shoppingLists[0]?.id)===id);for(const it of itemsInList){await api(`/api/shopping/${it.id}`,"DELETE")}await api(`/api/shoppinglists/${id}`,"DELETE");if(S.activeListId===id)S.activeListId=null;closeModal();sync()}
 async function toggleTodo(id){const i=S.todos.find(x=>x.id===id);if(!i)return;i.done=!i.done;render();api(`/api/todos/${id}`,"PUT",{done:i.done})}
-async function delTodo(id){S.todos=S.todos.filter(x=>x.id!==id);render();api(`/api/todos/${id}`,"DELETE")}
+async function delTodo(id){if(!confirm("Diese Aufgabe wirklich löschen?"))return;S.todos=S.todos.filter(x=>x.id!==id);render();api(`/api/todos/${id}`,"DELETE")}
 async function addTodo(t,d,p,a){await api("/api/todos","POST",{text:t,due:d,priority:p,assignee:a,done:false});closeModal();sync()}
 async function editTodo(id,t,d,p,a){await api(`/api/todos/${id}`,"PUT",{text:t,due:d,priority:p,assignee:a});closeModal();sync()}
 async function addEv(title,date,time,endTime,allDay,inv,note,rec,rem,recEnd){const p=getPartner();const dur=allDay?1440:computeDuration(time,endTime);await api("/api/events","POST",{title,date,time:allDay?"00:00":time,endTime:allDay?"":endTime,duration:dur,allDay:!!allDay,invited:inv&&p?p.id:null,status:inv&&p?"pending":"accepted",note:note||"",recurrence:rec||"none",reminders:rem||[],recurrenceEnd:recEnd||""});closeModal();sync()}
@@ -407,7 +414,7 @@ async function acceptEv(id){await api(`/api/events/${id}`,"PUT",{status:"accepte
 async function declineEv(id){await api(`/api/events/${id}`,"PUT",{status:"declined"});sync()}
 async function suggestTime(id,t){await api(`/api/events/${id}`,"PUT",{suggestedTime:t,suggestedBy:S.user.id});sync()}
 async function acceptSug(id){const e=S.events.find(x=>x.id===id);if(!e)return;await api(`/api/events/${id}`,"PUT",{time:e.suggestedTime,suggestedTime:null,suggestedBy:null,status:"accepted"});sync()}
-async function delEv(id){S.events=S.events.filter(x=>x.id!==id);render();api(`/api/events/${id}`,"DELETE")}
+async function delEv(id){if(!confirm("Diesen Termin wirklich löschen?"))return;S.events=S.events.filter(x=>x.id!==id);render();api(`/api/events/${id}`,"DELETE")}
 function openModal(t){S.modal=t;S.editingId=null;renderModal()}
 function closeModal(){S.modal=null;S.editingId=null;document.getElementById("modal-container").innerHTML="";render()}
 window.openEditShop=(id)=>{S.editingId=id;S.modal="shopping";renderModal()};
