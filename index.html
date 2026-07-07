@@ -506,6 +506,10 @@ function renderDash(){
   let h="";
   if(!S.notifEnabled&&"Notification" in window)h+=`<div class="notif-banner" onclick="requestNotifPermission()"><div>${I.bell}</div><p>Benachrichtigungen aktivieren</p><button class="btn btn-sm" onclick="event.stopPropagation();requestNotifPermission()">Aktivieren</button></div>`;
   h+=`<div class="stats-row"><div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--c-shop)">${os}</div><div class="stat-label">Einkauf</div></div><div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--c-todo)">${ot}</div><div class="stat-label">To-Dos</div></div><div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--c-cal)">${ue}</div><div class="stat-label">Termine</div></div></div>`;
+  const budget=getShopTotals(S.shopping);
+  if(budget.total>0){
+    h+=`<div class="section-label">Gesamtbudget</div><div class="stats-row" onclick="S.page='shopping';render()" style="cursor:pointer"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.3rem">${fmtCHF(budget.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.3rem">${fmtCHF(budget.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.3rem">${fmtCHF(budget.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
+  }
   const todayEvts=getEventsForDate(todayStr());
   h+=`<div class="dash-today-header"><div class="section-label">Heute</div><button class="dash-today-link" onclick="S.page='calendar';S.calView='day';S.calDate=todayStr();render()">Tagesansicht →</button></div>`;
   h+=todayEvts.length?renderDayTimeline(todayStr(),true):`<div class="empty-state"><p>Keine Termine heute</p></div>`;
@@ -520,6 +524,11 @@ function renderDash(){
 }
 
 function fmtCHF(n){return"CHF "+n.toFixed(2).replace(".",".")}
+function getShopTotals(items){
+  const total=items.reduce((s,i)=>s+(i.qty||1)*(i.price||0),0);
+  const paid=items.filter(i=>i.done).reduce((s,i)=>s+(i.qty||1)*(i.price||0),0);
+  return{total,paid,open:total-paid};
+}
 
 function renderShop(){
   if(!S.shoppingLists.length)return`<div class="empty-state"><p>Listen werden geladen…</p></div>`;
@@ -534,21 +543,38 @@ function renderShop(){
   const listItems=S.shopping.filter(s=>(s.listId||defaultListId)===activeId);
   const items=listItems;
   const open=items.filter(x=>!x.done),done=items.filter(x=>x.done);
-  const totalOpen=open.reduce((sum,s)=>sum+(s.qty||1)*(s.price||0),0);
-  const totalAll=items.reduce((sum,s)=>sum+(s.qty||1)*(s.price||0),0);
-  if(totalAll>0){
-    h+=`<div class="stats-row" style="grid-template-columns:1fr 1fr"><div class="stat-card"><div class="stat-num" style="color:var(--c-shop);font-size:1.35rem">${fmtCHF(totalOpen)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.35rem">${fmtCHF(totalAll)}</div><div class="stat-label">Gesamt</div></div></div>`;
+  const listTotals=getShopTotals(items);
+  const allTotals=getShopTotals(S.shopping);
+  if(allTotals.total>0){
+    h+=`<div class="section-label" style="margin-top:0">Budget · ${esc(activeList.name)}</div><div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.25rem">${fmtCHF(listTotals.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.25rem">${fmtCHF(listTotals.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.25rem">${fmtCHF(listTotals.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
+    if(S.shoppingLists.length>1){
+      h+=`<div class="section-label">Gesamtbudget</div><div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.25rem">${fmtCHF(allTotals.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.25rem">${fmtCHF(allTotals.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.25rem">${fmtCHF(allTotals.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
+    }
   }
   h+=`<div class="dash-today-header" style="margin-top:0"><div class="section-label" style="margin:0">${esc(activeList.name)}</div><button class="dash-today-link" style="color:var(--c-shop)" onclick="openEditListModal('${activeList.id}')">Liste bearbeiten</button></div>`;
   if(!open.length&&!done.length)h+=`<div class="empty-state"><p>Liste ist leer</p></div>`;
-  open.forEach(s=>{
+
+  const unpriced=open.filter(s=>!(s.price>0));
+  const priced=open.filter(s=>s.price>0).sort((a,b)=>a.price-b.price);
+
+  function renderOpenCard(s){
     const qty=s.qty||1,price=s.price||0,sub=qty*price;
     let priceTag="";
     if(price>0)priceTag=`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty>1?`${qty}× `:""}${fmtCHF(price)}${qty>1?` = ${fmtCHF(sub)}`:""}</span>`;
     else if(qty>1)priceTag=`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty}×</span>`;
     const linkBtn=s.link?`<button class="del-btn" onclick="event.stopPropagation();window.open('${esc(s.link)}','_blank')" title="Produkt öffnen">${I.link}</button>`:"";
-    h+=`<div class="card" data-anchor="shop_${s.id}"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.assignee||s.addedBy||s.createdBy)}</div>${(priceTag||s.assignee)?`<div class="card-meta">${priceTag}${s.assignee?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">für ${esc(getUser(s.assignee).displayName)}</span>`:""}</div>`:""}</div>`
-  });
+    return`<div class="card" data-anchor="shop_${s.id}"><div class="card-row"><div class="card-check" onclick="toggleShop('${s.id}')"></div><div class="card-text">${esc(s.text)}</div>${linkBtn}<button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.assignee||s.addedBy||s.createdBy)}</div>${(priceTag||s.assignee)?`<div class="card-meta">${priceTag}${s.assignee?`<span class="tag" style="background:var(--c-shop-dim);color:var(--c-shop);font-size:.6rem">für ${esc(getUser(s.assignee).displayName)}</span>`:""}</div>`:""}</div>`;
+  }
+
+  if(unpriced.length){
+    h+=`<div class="section-label">Noch zu klären (${unpriced.length})</div>`;
+    unpriced.forEach(s=>{h+=renderOpenCard(s)});
+  }
+  if(priced.length){
+    h+=`<div class="section-label">Mit Preis${unpriced.length?" · nach Preis sortiert":""}</div>`;
+    priced.forEach(s=>{h+=renderOpenCard(s)});
+  }
+
   if(done.length){h+=`<div class="section-label">Erledigt</div>`;done.forEach(s=>{
     const qty=s.qty||1,price=s.price||0,sub=qty*price;
     const priceTag=price>0?`<span class="tag" style="background:var(--card-hover);color:var(--text-sec)">${qty>1?`${qty}× `:""}${fmtCHF(price)}${qty>1?` = ${fmtCHF(sub)}`:""}</span>`:"";
