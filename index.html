@@ -305,6 +305,19 @@ function recLabel(r){return RECURRENCE_OPTS.find(x=>x.id===r)?.label||""}
 function getEventsForDate(ds){let r=[];S.events.forEach(e=>{if(e.date===ds){r.push(e);return}if(!e.recurrence||e.recurrence==="none")return;if(e.recurrenceEnd&&ds>e.recurrenceEnd)return;const ed=new Date(e.date),td=new Date(ds);if(td<ed)return;const diff=Math.floor((td-ed)/86400000);let m=false;if(e.recurrence==="daily")m=true;else if(e.recurrence==="weekly")m=diff%7===0;else if(e.recurrence==="monthly")m=td.getDate()===ed.getDate();else if(e.recurrence==="yearly")m=td.getDate()===ed.getDate()&&td.getMonth()===ed.getMonth();if(m)r.push({...e,_recurDate:ds})});return r}
 function getEventsForMonth(y,m){const dim=new Date(y,m+1,0).getDate();let all=[];for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;getEventsForDate(ds).forEach(e=>{if(!all.find(x=>x.id===e.id&&(x._recurDate||x.date)===(e._recurDate||e.date)))all.push(e)})}return all.sort((a,b)=>(a._recurDate||a.date).localeCompare(b._recurDate||b.date)||a.time.localeCompare(b.time))}
 
+function countUpcomingEvents(days){
+  const seen=new Set();let count=0;
+  for(let i=0;i<days;i++){
+    const d=new Date();d.setDate(d.getDate()+i);
+    const ds=d.toISOString().split("T")[0];
+    getEventsForDate(ds).forEach(e=>{
+      const key=e.id+"_"+(e._recurDate||e.date);
+      if(!seen.has(key)){seen.add(key);count++}
+    });
+  }
+  return count;
+}
+
 function getWeekDates(ds){const d=new Date(ds);let dow=d.getDay();dow=dow===0?6:dow-1;const monday=new Date(d);monday.setDate(d.getDate()-dow);const out=[];for(let i=0;i<7;i++){const x=new Date(monday);x.setDate(monday.getDate()+i);out.push(x.toISOString().split("T")[0])}return out}
 function shiftDate(ds,days){const d=new Date(ds);d.setDate(d.getDate()+days);return d.toISOString().split("T")[0]}
 
@@ -501,16 +514,12 @@ function renderMain(){
 function renderPage(){if(S.page==="home")return renderDash();if(S.page==="shopping")return renderShop();if(S.page==="todos")return renderTodos();if(S.page==="calendar")return renderCal();return""}
 
 function renderDash(){
-  const os=S.shopping.filter(x=>!x.done).length,ot=S.todos.filter(x=>!x.done).length,ue=S.events.filter(x=>x.date>=todayStr()).length;
+  const os=S.shopping.filter(x=>!x.done).length,ot=S.todos.filter(x=>!x.done).length,ue=countUpcomingEvents(30);
   const pi=S.events.filter(e=>e.invited===S.user.id&&e.status==="pending");
   const sc=S.events.filter(e=>e.suggestedBy&&e.suggestedBy!==S.user.id&&e.createdBy===S.user.id);
   let h="";
   if(!S.notifEnabled&&"Notification" in window)h+=`<div class="notif-banner" onclick="requestNotifPermission()"><div>${I.bell}</div><p>Benachrichtigungen aktivieren</p><button class="btn btn-sm" onclick="event.stopPropagation();requestNotifPermission()">Aktivieren</button></div>`;
-  h+=`<div class="stats-row"><div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--c-shop)">${os}</div><div class="stat-label">Einkauf</div></div><div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--c-todo)">${ot}</div><div class="stat-label">To-Dos</div></div><div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--c-cal)">${ue}</div><div class="stat-label">Termine</div></div></div>`;
-  const budget=getShopTotals(S.shopping);
-  if(budget.total>0){
-    h+=`<div class="section-label">Gesamtbudget</div><div class="stats-row" onclick="S.page='shopping';render()" style="cursor:pointer"><div class="stat-card"><div class="stat-num" style="color:#f0883e;font-size:1.3rem">${fmtCHF(budget.open)}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:1.3rem">${fmtCHF(budget.paid)}</div><div class="stat-label">Bezahlt</div></div><div class="stat-card"><div class="stat-num" style="font-size:1.3rem">${fmtCHF(budget.total)}</div><div class="stat-label">Gesamt</div></div></div>`;
-  }
+  h+=`<div class="stats-row"><div class="stat-card" onclick="S.page='shopping';render()"><div class="stat-num" style="color:var(--c-shop)">${os}</div><div class="stat-label">Einkauf</div></div><div class="stat-card" onclick="S.page='todos';render()"><div class="stat-num" style="color:var(--c-todo)">${ot}</div><div class="stat-label">To-Dos</div></div><div class="stat-card" onclick="S.page='calendar';render()"><div class="stat-num" style="color:var(--c-cal)">${ue}</div><div class="stat-label">30 Tage</div></div></div>`;
   const todayEvts=getEventsForDate(todayStr());
   h+=`<div class="dash-today-header"><div class="section-label">Heute</div><button class="dash-today-link" onclick="S.page='calendar';S.calView='day';S.calDate=todayStr();render()">Tagesansicht →</button></div>`;
   h+=todayEvts.length?renderDayTimeline(todayStr(),true):`<div class="empty-state"><p>Keine Termine heute</p></div>`;
@@ -518,9 +527,7 @@ function renderDash(){
   if(sc.length){h+=`<div class="section-label">Zeitänderungen</div>`;sc.forEach(e=>{h+=renderEvCard(e,true)})}
   const nt=S.todos.filter(t=>!t.done).slice(0,3);
   if(nt.length){h+=`<div class="section-label">Nächste To-Dos</div>`;nt.forEach(t=>{h+=`<div class="card" data-anchor="dashtodo_${t.id}" onclick="S.page='todos';render()"><div class="card-row"><div class="priority-dot" style="background:${pColor(t.priority)}"></div><div class="card-text">${esc(t.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditTodo('${t.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delTodo('${t.id}')">${I.trash}</button>${av(t.assignee)}</div>${t.due?`<div class="card-meta"><span class="tag" style="background:var(--c-todo-dim);color:var(--c-todo)">${I.clock} ${formatDate(t.due)}</span></div>`:""}</div>`})}
-  const ns=S.shopping.filter(x=>!x.done).slice(0,3);
-  if(ns.length){h+=`<div class="section-label">Einkaufsliste</div>`;ns.forEach(s=>{h+=`<div class="card" data-anchor="dashshop_${s.id}" onclick="S.page='shopping';render()"><div class="card-row"><div class="card-text">${esc(s.text)}</div><button class="del-btn" onclick="event.stopPropagation();openEditShop('${s.id}')">${I.edit}</button><button class="del-btn" onclick="event.stopPropagation();delShop('${s.id}')">${I.trash}</button>${av(s.addedBy||s.createdBy)}</div></div>`})}
-  if(!nt.length&&!ns.length&&!pi.length)h+=`<div class="empty-state"><p>Alles erledigt</p></div>`;
+  if(!nt.length&&!pi.length)h+=`<div class="empty-state"><p>Alles erledigt</p></div>`;
   return h;
 }
 
