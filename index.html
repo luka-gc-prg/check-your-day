@@ -211,7 +211,8 @@ svg.i-check{width:12px;height:12px;stroke:#fff}
 <script>
 const API_URL="https://check-your-day.luka-gc.workers.dev";
 const SYNC_INTERVAL=4000;
-const FIXED_USERS=[{id:"luka",name:"Luka",color:"#f0883e",emoji:"L"},{id:"samanta",name:"Samanta",color:"#ff6b8a",emoji:"S"}];
+const FIXED_USERS=[{id:"luka",name:"Luka",color:"#f0883e",emoji:"Lu"},{id:"samanta",name:"Samanta",color:"#ff6b8a",emoji:"S"},{id:"lars",name:"Lars",color:"#58a6ff",emoji:"La"}];
+const SPACES={samanta:{members:["luka","samanta"],label:"Samanta"},lars:{members:["luka","lars"],label:"Lars"}};
 const OVERVIEW_ID="__overview__";
 const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 const DAYS_L=["Mo","Di","Mi","Do","Fr","Sa","So"];
@@ -246,14 +247,14 @@ edit:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2
 link:`<svg class="i i-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`,
 };
 
-let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),users:[],page:"home",shopping:[],shoppingLists:[],activeListId:null,todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),calView:"month",calDate:todayStrInit(),selectedDate:null,todoFilter:"alle",modal:null,editingId:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}"),baselineSet:false};
+let S={token:sessionStorage.getItem("cyd_token"),user:JSON.parse(sessionStorage.getItem("cyd_user")||"null"),currentSpace:sessionStorage.getItem("cyd_space")||null,availableSpaces:JSON.parse(sessionStorage.getItem("cyd_spaces")||"[]"),users:[],page:"home",shopping:[],shoppingLists:[],activeListId:null,todos:[],events:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),calView:"month",calDate:todayStrInit(),selectedDate:null,todoFilter:"alle",modal:null,editingId:null,selectedUser:null,authError:null,syncStatus:"ok",notifEnabled:localStorage.getItem("cyd_notif")==="true",firedReminders:JSON.parse(localStorage.getItem("cyd_fired")||"{}"),baselineSet:false};
 function todayStrInit(){return new Date().toISOString().split("T")[0]}
 let syncTimer=null,reminderTimer=null;
 
 function setSection(page){const s=SECTION[page]||SECTION.home;document.documentElement.style.setProperty("--accent",s.accent);document.documentElement.style.setProperty("--accent-dim",s.dim);document.documentElement.style.setProperty("--accent-bg",s.bg)}
 
 // API
-async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const r=await fetch(API_URL+p,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
+async function api(p,m="GET",b=null){const h={"Content-Type":"application/json"};if(S.token)h["Authorization"]=`Bearer ${S.token}`;const o={method:m,headers:h};if(b)o.body=JSON.stringify(b);const needsSpace=/^\/api\/(shopping|shoppinglists|todos|events)/.test(p)&&S.currentSpace;let url=API_URL+p;if(needsSpace){url+=(p.includes("?")?"&":"?")+"space="+encodeURIComponent(S.currentSpace)}const r=await fetch(url,o);const d=await r.json();if(!r.ok)throw new Error(d.error||"Fehler");return d}
 let _interacting=false,_interactTimer=null,_pendingRender=false;
 function markInteracting(){_interacting=true;if(_interactTimer)clearTimeout(_interactTimer)}
 function markInteractionEnd(){if(_interactTimer)clearTimeout(_interactTimer);_interactTimer=setTimeout(()=>{if(!_scrollMoving){_interacting=false;if(S.token&&S.user&&_pendingRender){_pendingRender=false;render()}}},900)}
@@ -281,20 +282,25 @@ setInterval(()=>{
   }
 },120);
 
-async function sync(){if(!S.token)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const oldSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const[s,t,e,u,sl]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users"),api("/api/shoppinglists")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.shoppingLists=sl.shoppinglists||[];await ensureDefaultList();if(!S.activeListId)S.activeListId=OVERVIEW_ID;S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);const newSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const dataChanged=oldSnapshot!==newSnapshot;if(dataChanged&&!S.modal&&!_interacting){render()}else{updateSyncDot();if(dataChanged)_pendingRender=true}checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
+async function sync(){if(!S.token||!S.currentSpace)return;try{S.syncStatus="syncing";updateSyncDot();const oldShopping=S.shopping,oldTodos=S.todos;const oldSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const[s,t,e,u,sl]=await Promise.all([api("/api/shopping"),api("/api/todos"),api("/api/events"),api("/api/users"),api("/api/shoppinglists")]);S.shopping=s.shopping||[];S.todos=t.todos||[];S.events=e.events||[];S.users=u.users||[];S.shoppingLists=sl.shoppinglists||[];await ensureDefaultList();if(!S.activeListId)S.activeListId=OVERVIEW_ID;S.syncStatus="ok";checkNewItems(oldShopping,oldTodos);const newSnapshot=JSON.stringify({sh:S.shopping,td:S.todos,ev:S.events,ls:S.shoppingLists});const dataChanged=oldSnapshot!==newSnapshot;if(dataChanged&&!S.modal&&!_interacting){render()}else{updateSyncDot();if(dataChanged)_pendingRender=true}checkReminders()}catch(e){S.syncStatus="error";updateSyncDot()}}
 async function ensureDefaultList(){if(S.shoppingLists.length)return;try{const r=await api("/api/shoppinglists","POST",{name:"Alltag",color:"#ff6b8a"});S.shoppingLists=[r.item];S.activeListId=r.item.id}catch(e){}}
 function startSync(){sync();syncTimer=setInterval(sync,SYNC_INTERVAL);startReminderCheck()}
 function stopSync(){if(syncTimer)clearInterval(syncTimer);syncTimer=null;stopReminderCheck()}
 function updateSyncDot(){const d=document.getElementById("sync-dot");if(d)d.className=`sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}`}
 
 // Auth
-async function doLogin(u,p){try{S.authError=null;const d=await api("/api/auth/login","POST",{username:u,password:p});S.token=d.token;S.user=d.user;sessionStorage.setItem("cyd_token",d.token);sessionStorage.setItem("cyd_user",JSON.stringify(d.user));S.selectedUser=null;S.page="home";render();startSync()}catch(e){S.authError=e.message;render()}}
-function logout(){S.token=null;S.user=null;S.shopping=[];S.todos=[];S.events=[];S.users=[];S.selectedUser=null;S.authError=null;S.baselineSet=false;sessionStorage.removeItem("cyd_token");sessionStorage.removeItem("cyd_user");stopSync();render()}
+async function doLogin(u,p){try{S.authError=null;const d=await api("/api/auth/login","POST",{username:u,password:p});S.token=d.token;S.user=d.user;S.availableSpaces=d.spaces||[];sessionStorage.setItem("cyd_token",d.token);sessionStorage.setItem("cyd_user",JSON.stringify(d.user));sessionStorage.setItem("cyd_spaces",JSON.stringify(S.availableSpaces));S.selectedUser=null;S.page="home";
+  if(S.availableSpaces.length===1){chooseSpace(S.availableSpaces[0])}
+  else{S.currentSpace=null;sessionStorage.removeItem("cyd_space");render()}
+}catch(e){S.authError=e.message;render()}}
+function chooseSpace(spaceId){S.currentSpace=spaceId;sessionStorage.setItem("cyd_space",spaceId);S.shopping=[];S.todos=[];S.events=[];S.shoppingLists=[];S.activeListId=null;S.baselineSet=false;S.page="home";render();startSync()}
+function switchSpace(){stopSync();S.currentSpace=null;sessionStorage.removeItem("cyd_space");S.shopping=[];S.todos=[];S.events=[];S.shoppingLists=[];S.activeListId=null;render()}
+function logout(){S.token=null;S.user=null;S.currentSpace=null;S.availableSpaces=[];S.shopping=[];S.todos=[];S.events=[];S.shoppingLists=[];S.activeListId=null;S.users=[];S.selectedUser=null;S.authError=null;S.baselineSet=false;sessionStorage.removeItem("cyd_token");sessionStorage.removeItem("cyd_user");sessionStorage.removeItem("cyd_space");sessionStorage.removeItem("cyd_spaces");stopSync();render()}
 
 // Helpers
 function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 function getUser(id){return S.users.find(u=>u.id===id)||FIXED_USERS.find(u=>u.id===id)||{displayName:id,color:"#555",emoji:"?"}}
-function getPartner(){return S.users.find(u=>u.id!==S.user?.id)||FIXED_USERS.find(u=>u.id!==(S.user?.id))||null}
+function getPartner(){if(!S.currentSpace)return null;const partnerId=(SPACES[S.currentSpace]?.members||[]).find(id=>id!==S.user?.id);if(!partnerId)return null;return S.users.find(u=>u.id===partnerId)||FIXED_USERS.find(u=>u.id===partnerId)||null}
 function formatDate(d){const dt=new Date(d);return`${dt.getDate()}. ${MONTHS[dt.getMonth()].slice(0,3)}`}
 function todayStr(){return new Date().toISOString().split("T")[0]}
 function pColor(p){return p==="high"?"var(--red)":p==="medium"?"#f0883e":"var(--c-todo)"}
@@ -487,6 +493,7 @@ function render(){
   const scrollTop=(prevContent&&samePage)?prevContent.scrollTop:0;
   const anchor=(prevContent&&samePage)?getScrollAnchor(prevContent):null;
   if(!S.token||!S.user){app.innerHTML=renderAuth();_lastRenderedPage=null;return}
+  if(S.availableSpaces.length>1&&!S.currentSpace){app.innerHTML=renderSpacePicker();_lastRenderedPage=null;return}
   app.innerHTML=renderMain();
   const newContent=document.querySelector(".content");
   if(newContent){
@@ -494,6 +501,10 @@ function render(){
     else newContent.scrollTop=0;
   }
   _lastRenderedPage=S.page;
+}
+
+function renderSpacePicker(){
+  return`<div class="auth"><div class="auth-logo"><h1>check your day</h1><p>mit wem?</p></div><div class="auth-users">${S.availableSpaces.map(sp=>{const info=SPACES[sp];const partnerId=info.members.find(id=>id!==S.user.id);const partner=FIXED_USERS.find(u=>u.id===partnerId);return`<div class="auth-user" onclick="chooseSpace('${sp}')"><div class="avatar" style="background:${partner.color}">${partner.emoji}</div><span>${esc(info.label)}</span></div>`}).join("")}</div><button class="btn btn-ghost" style="max-width:280px;margin-top:1rem" onclick="logout()">Ausloggen</button></div>`;
 }
 
 function renderAuth(){
@@ -505,7 +516,8 @@ window.doLoginClick=()=>{const pw=document.getElementById("pw")?.value;if(!pw){S
 function renderMain(){
   const titles={home:"Dashboard",shopping:"Einkaufsliste",todos:"To-Do",calendar:"Kalender"};
   const pending=S.events.filter(e=>e.invited===S.user.id&&e.status==="pending").length;
-  return`<div class="header"><div class="header-left"><div class="avatar avatar-header" style="background:${S.user.color}">${S.user.emoji}</div><h2>${titles[S.page]}</h2></div><div class="header-actions"><div id="sync-dot" class="sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}"></div><button class="icon-btn ${S.notifEnabled?"active":""}" onclick="toggleNotif()">${S.notifEnabled?I.bell:I.bellOff}</button>${pending>0&&S.page!=="home"?`<button class="icon-btn" onclick="S.page='home';render()">${I.bell}<span class="badge">${pending}</span></button>`:""}<button class="icon-btn" onclick="logout()">${I.logout}</button></div></div>
+  const spaceLabel=S.availableSpaces.length>1?`<span style="font-size:.65rem;color:var(--text-muted);font-weight:500;margin-left:.4rem">· mit ${esc(SPACES[S.currentSpace]?.label||"")}</span>`:"";
+  return`<div class="header"><div class="header-left"><div class="avatar avatar-header" style="background:${S.user.color}">${S.user.emoji}</div><h2>${titles[S.page]}</h2>${spaceLabel}</div><div class="header-actions"><div id="sync-dot" class="sync-dot ${S.syncStatus==="syncing"?"syncing":S.syncStatus==="error"?"error":""}"></div>${S.availableSpaces.length>1?`<button class="icon-btn" onclick="switchSpace()" title="Space wechseln">${I.repeat}</button>`:""}<button class="icon-btn ${S.notifEnabled?"active":""}" onclick="toggleNotif()">${S.notifEnabled?I.bell:I.bellOff}</button>${pending>0&&S.page!=="home"?`<button class="icon-btn" onclick="S.page='home';render()">${I.bell}<span class="badge">${pending}</span></button>`:""}<button class="icon-btn" onclick="logout()">${I.logout}</button></div></div>
   <div class="content">${renderPage()}</div>
   ${(S.page!=="home"&&!(S.page==="shopping"&&(S.activeListId||OVERVIEW_ID)===OVERVIEW_ID))?`<button class="fab" onclick="openModal('${S.page}')">${I.plus}</button>`:""}
   <div class="bottom-nav">${[{id:"home",icon:"home",l:"Home"},{id:"shopping",icon:"cart",l:"Einkauf"},{id:"todos",icon:"check",l:"To-Do"},{id:"calendar",icon:"calendar",l:"Kalender"}].map(n=>`<button class="nav-item ${S.page===n.id?"active":""}" onclick="S.page='${n.id}';S.selectedDate=null;render()">${I[n.icon]}<span>${n.l}</span></button>`).join("")}</div>`
@@ -720,7 +732,7 @@ window.submitEv=()=>{const t=document.getElementById("m-title")?.value.trim();co
 window.submitSug=()=>{const t=document.getElementById("m-stime")?.value;if(!t||!S._sugId)return;suggestTime(S._sugId,t);closeModal()};
 window.submitShopList=()=>{const n=document.getElementById("m-listname")?.value.trim();const c=document.querySelector("#list-color-pills .cat-pill.active")?.dataset.val||"#ff6b8a";if(!n)return;if(S.editingId)editShopList(S.editingId,n,c);else addShopList(n,c)};
 
-render();if(S.token)startSync();
+render();if(S.token&&S.currentSpace)startSync();
 </script>
 </body>
 </html>
