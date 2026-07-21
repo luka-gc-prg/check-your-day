@@ -378,35 +378,71 @@ window.jumpToDay=(ds)=>{S.calView="day";S.calDate=ds;S.selectedDate=ds;S.page="c
 // Notifications
 function requestNotifPermission(){if(!("Notification" in window))return;Notification.requestPermission().then(p=>{S.notifEnabled=p==="granted";localStorage.setItem("cyd_notif",S.notifEnabled?"true":"false");render()})}
 function toggleNotif(){if(S.notifEnabled){S.notifEnabled=false;localStorage.setItem("cyd_notif","false");render()}else requestNotifPermission()}
+function syncNotifPermissionState(){
+  if(!("Notification" in window)){S.notifEnabled=false;return}
+  // Our stored preference only counts if the OS/browser permission is still actually granted.
+  // iOS can silently revoke this without telling the page, leaving a stale "enabled" flag.
+  const wanted=localStorage.getItem("cyd_notif")==="true";
+  S.notifEnabled=wanted&&Notification.permission==="granted";
+  if(wanted&&!S.notifEnabled)localStorage.setItem("cyd_notif","false");
+}
 function startReminderCheck(){reminderTimer=setInterval(checkReminders,30000)}
 function stopReminderCheck(){if(reminderTimer)clearInterval(reminderTimer);reminderTimer=null}
-function checkReminders(){if(!S.notifEnabled||!S.events.length)return;const now=new Date();const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);[todayStr(),tmrw.toISOString().split("T")[0]].forEach(ds=>{getEventsForDate(ds).forEach(e=>{if(!e.reminders||!e.reminders.length)return;const evT=new Date(`${e._recurDate||e.date}T${e.time}:00`);e.reminders.forEach(rM=>{const rT=new Date(evT.getTime()-rM*60000);const diff=rT.getTime()-now.getTime();const key=`${e.id}_${e._recurDate||e.date}_${rM}`;if(diff<=0&&diff>-60000&&!S.firedReminders[key]){fireNotif(e,rM);S.firedReminders[key]=true;localStorage.setItem("cyd_fired",JSON.stringify(S.firedReminders))}})})})}
+function checkReminders(){
+  if(!S.notifEnabled||!S.events.length)return;
+  const now=new Date();const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);
+  const due=[];
+  [todayStr(),tmrw.toISOString().split("T")[0]].forEach(ds=>{
+    getEventsForDate(ds).forEach(e=>{
+      if(!e.reminders||!e.reminders.length)return;
+      const evT=new Date(`${e._recurDate||e.date}T${e.time}:00`);
+      e.reminders.forEach(rM=>{
+        const rT=new Date(evT.getTime()-rM*60000);
+        const diff=rT.getTime()-now.getTime();
+        const key=`${e.id}_${e._recurDate||e.date}_${rM}`;
+        if(diff<=0&&diff>-60000&&!S.firedReminders[key]){
+          due.push({e,rM,key});
+        }
+      });
+    });
+  });
+  if(!due.length)return;
+  due.forEach(d=>{S.firedReminders[d.key]=true});
+  localStorage.setItem("cyd_fired",JSON.stringify(S.firedReminders));
+  if(due.length===1){fireNotif(due[0].e,due[0].rM)}
+  else{fireGroupedNotif(due)}
+}
+function fireGroupedNotif(due){
+  try{new Notification(`${due.length} Erinnerungen`,{body:due.map(d=>d.e.title).join(", "),tag:"grouped_"+Date.now()})}catch(err){}
+}
 function fireNotif(e,m){const l=m===0?"Jetzt":m<60?`In ${m} Min`:m===60?"In 1 Std":m===1440?"Morgen":m===4320?"In 3 Tagen":"In 1 Woche";try{new Notification(`${l}: ${e.title}`,{body:`${e.time} Uhr`,tag:e.id})}catch(err){}}
 
 function checkNewItems(oldShopping,oldTodos){
   if(!S.notifEnabled)return;
   if(!S.baselineSet){S.baselineSet=true;return}
+  const newTodos=[];
   const oldTodoMap={};oldTodos.forEach(t=>oldTodoMap[t.id]=t.assignee);
   S.todos.forEach(t=>{
     const isNew=!(t.id in oldTodoMap);
     const prevAssignee=oldTodoMap[t.id];
     if(t.assignee===S.user.id&&t.createdBy!==S.user.id&&(isNew||prevAssignee!==S.user.id)){
-      const by=getUser(t.createdBy||t.addedBy);
-      try{new Notification(`Neue Aufgabe für dich`,{body:`${t.text} — von ${by.displayName}`,tag:"todo_"+t.id})}catch(err){}
+      newTodos.push(t);
     }
   });
+  const newShop=[];
   const oldShopIds=new Set(oldShopping.map(s=>s.id));
   S.shopping.forEach(s=>{
     if(oldShopIds.has(s.id))return;
     const creator=s.addedBy||s.createdBy;
     if(creator===S.user.id)return;
-    const by=getUser(creator);
-    if(s.assignee&&s.assignee===S.user.id){
-      try{new Notification(`Einkauf dir zugewiesen`,{body:`${s.text} — von ${by.displayName}`,tag:"shop_"+s.id})}catch(err){}
-    }else{
-      try{new Notification(`Neu auf der Einkaufsliste`,{body:`${s.text} — von ${by.displayName}`,tag:"shop_"+s.id})}catch(err){}
-    }
+    newShop.push(s);
   });
+
+  if(newTodos.length===1){const t=newTodos[0];const by=getUser(t.createdBy||t.addedBy);try{new Notification(`Neue Aufgabe für dich`,{body:`${t.text} — von ${by.displayName}`,tag:"todo_"+t.id})}catch(err){}}
+  else if(newTodos.length>1){try{new Notification(`${newTodos.length} neue Aufgaben für dich`,{body:newTodos.map(t=>t.text).join(", "),tag:"todos_"+Date.now()})}catch(err){}}
+
+  if(newShop.length===1){const s=newShop[0];const by=getUser(s.addedBy||s.createdBy);const label=s.assignee===S.user.id?"Einkauf dir zugewiesen":"Neu auf der Einkaufsliste";try{new Notification(label,{body:`${s.text} — von ${by.displayName}`,tag:"shop_"+s.id})}catch(err){}}
+  else if(newShop.length>1){try{new Notification(`${newShop.length} neue Einkäufe`,{body:newShop.map(s=>s.text).join(", "),tag:"shops_"+Date.now()})}catch(err){}}
 }
 
 // ICS
@@ -750,6 +786,7 @@ window.submitChangePw=async()=>{
 };
 window.submitShopList=()=>{const n=document.getElementById("m-listname")?.value.trim();const c=document.querySelector("#list-color-pills .cat-pill.active")?.dataset.val||"#ff6b8a";if(!n)return;if(S.editingId)editShopList(S.editingId,n,c);else addShopList(n,c)};
 
+syncNotifPermissionState();
 render();if(S.token&&S.currentSpace)startSync();
 </script>
 </body>
